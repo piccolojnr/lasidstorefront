@@ -1,0 +1,38 @@
+---
+import type { Category } from '../../api/catalog';
+
+interface Props {
+  categories: Category[];
+  activeSlug?: string;
+  baseUrl?: string;
+}
+
+const { categories, activeSlug, baseUrl = '/products' } = Astro.props;
+---
+
+<div class="flex flex-wrap gap-2">
+  <a
+    href={baseUrl}
+    class:list={[
+      'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+      !activeSlug
+        ? 'border-gray-900 bg-gray-900 text-white'
+        : 'border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900',
+    ]}
+  >
+    All
+  </a>
+  {categories.map((cat) => (
+    <a
+      href={`${baseUrl}?category=${cat.slug}`}
+      class:list={[
+        'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+        activeSlug === cat.slug
+          ? 'border-gray-900 bg-gray-900 text-white'
+          : 'border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900',
+      ]}
+    >
+      {cat.name}
+    </a>
+  ))}
+</div>

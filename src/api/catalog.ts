@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient, type PaginatedResult } from './client';
 
 export interface Category {
   id: number;
@@ -84,13 +84,9 @@ export const catalogApi = {
     return apiClient.get<Category>(`/catalog/categories/${slug}`);
   },
 
-  getProducts(query: ProductsQuery = {}): Promise<{ data: ProductSummary[]; meta: unknown }> {
+  getProducts(query: ProductsQuery = {}): Promise<PaginatedResult<ProductSummary>> {
     const qs = buildQuery(query as Record<string, unknown>);
-    // Products endpoint returns paginated envelope — return raw for meta access
-    return fetch(`${import.meta.env.PUBLIC_API_BASE ?? '/api/v1'}/catalog/products${qs}`, {
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    }).then((r) => r.json());
+    return apiClient.paginated<ProductSummary>(`/catalog/products${qs}`);
   },
 
   getProduct(slug: string): Promise<ProductDetail> {

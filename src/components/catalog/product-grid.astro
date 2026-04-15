@@ -1,0 +1,23 @@
+---
+import ProductCard from './product-card.astro';
+import type { ProductSummary } from '../../api/catalog';
+
+interface Props {
+  products: ProductSummary[];
+}
+
+const { products } = Astro.props;
+---
+
+{products.length === 0 ? (
+  <div class="py-24 text-center text-gray-400">
+    <p class="text-lg">No products found.</p>
+    <p class="mt-1 text-sm">Try adjusting your filters.</p>
+  </div>
+) : (
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+    {products.map((product) => (
+      <ProductCard product={product} />
+    ))}
+  </div>
+)}

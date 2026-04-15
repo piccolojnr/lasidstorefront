@@ -1,0 +1,101 @@
+---
+import Layout from '../../layouts/layout.astro';
+import ProductGrid from '../../components/catalog/product-grid.astro';
+import CategoryFilter from '../../components/catalog/category-filter.astro';
+import SortSelect from '../../components/catalog/sort-select.astro';
+import { catalogApi } from '../../api/catalog';
+import type { ProductsQuery } from '../../api/catalog';
+
+const { searchParams } = Astro.url;
+
+const query: ProductsQuery = {
+  search: searchParams.get('search') ?? undefined,
+  category: searchParams.get('category') ?? undefined,
+  brand: searchParams.get('brand') ?? undefined,
+  sort: (searchParams.get('sort') as ProductsQuery['sort']) ?? 'latest',
+  page: searchParams.has('page') ? Number(searchParams.get('page')) : undefined,
+};
+
+const [{ data: products, meta }, categories] = await Promise.all([
+  catalogApi.getProducts(query),
+  catalogApi.getCategories({ root_only: true }),
+]);
+
+const currentPage = meta.current_page;
+const lastPage = meta.last_page;
+
+function pageUrl(page: number) {
+  const params = new URLSearchParams(searchParams);
+  params.set('page', String(page));
+  return `/products?${params.toString()}`;
+}
+---
+
+<Layout title="Shop">
+  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Shop</h1>
+      {meta.total > 0 && (
+        <p class="mt-1 text-sm text-gray-500">{meta.total} products</p>
+      )}
+    </div>
+
+    <!-- Search + sort bar -->
+    <form method="get" action="/products" class="mb-6 flex flex-wrap items-center gap-3">
+      <div class="relative flex-1 min-w-48">
+        <input
+          type="search"
+          name="search"
+          value={query.search ?? ''}
+          placeholder="Search products…"
+          class="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900"
+        />
+        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+      </div>
+      <!-- Preserve category in form submit -->
+      {query.category && <input type="hidden" name="category" value={query.category} />}
+      <SortSelect value={query.sort} />
+      <button type="submit" class="sr-only">Search</button>
+    </form>
+
+    <!-- Category pills -->
+    {categories.length > 0 && (
+      <div class="mb-8">
+        <CategoryFilter categories={categories} activeSlug={query.category} />
+      </div>
+    )}
+
+    <!-- Grid -->
+    <ProductGrid products={products} />
+
+    <!-- Pagination -->
+    {lastPage > 1 && (
+      <nav class="mt-10 flex items-center justify-center gap-2" aria-label="Pagination">
+        {currentPage > 1 && (
+          <a
+            href={pageUrl(currentPage - 1)}
+            class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors"
+          >
+            Previous
+          </a>
+        )}
+        <span class="text-sm text-gray-500">
+          Page {currentPage} of {lastPage}
+        </span>
+        {currentPage < lastPage && (
+          <a
+            href={pageUrl(currentPage + 1)}
+            class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors"
+          >
+            Next
+          </a>
+        )}
+      </nav>
+    )}
+
+  </div>
+</Layout>

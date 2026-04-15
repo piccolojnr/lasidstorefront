@@ -9,16 +9,23 @@ export interface ApiEnvelope<T> {
   errors: Record<string, string[]> | null;
 }
 
+export interface PaginationMeta {
+  current_page: number;
+  from: number;
+  last_page: number;
+  path: string;
+  per_page: number;
+  to: number;
+  total: number;
+}
+
 export interface PaginatedEnvelope<T> extends ApiEnvelope<T[]> {
-  meta: {
-    current_page: number;
-    from: number;
-    last_page: number;
-    path: string;
-    per_page: number;
-    to: number;
-    total: number;
-  };
+  meta: PaginationMeta;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  meta: PaginationMeta;
 }
 
 export class ApiError extends Error {
@@ -91,4 +98,35 @@ export const apiClient = {
 
   delete: <T>(path: string, headers?: Record<string, string>) =>
     request<T>('DELETE', path, undefined, headers),
+
+  /** For paginated endpoints that return both `data[]` and `meta`. */
+  async paginated<T>(path: string, headers?: Record<string, string>): Promise<PaginatedResult<T>> {
+    const token = cartToken.get();
+
+    const reqHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...(token ? { 'X-Cart-Token': token } : {}),
+      ...headers,
+    };
+
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: reqHeaders,
+    });
+
+    const envelope = (await res.json()) as PaginatedEnvelope<T>;
+
+    if (!res.ok || !envelope.success) {
+      throw new ApiError(
+        res.status,
+        envelope.message ?? 'An unexpected error occurred.',
+        envelope.errors,
+        envelope.data,
+      );
+    }
+
+    return { data: envelope.data ?? [], meta: envelope.meta };
+  },
 };
