@@ -1,0 +1,21 @@
+---
+import AccountLayout from '../../layouts/account-layout.astro';
+import AddressList from '../../components/account/address-list';
+import { createServerClient, ApiError } from '../../api/client';
+
+const cookieHeader = Astro.request.headers.get('cookie') ?? '';
+const api = createServerClient(cookieHeader);
+
+try {
+  // Auth check — if this throws 401 the redirect fires
+  await api.get('/profile');
+} catch (err) {
+  if (err instanceof ApiError && err.status === 401) {
+    return Astro.redirect('/auth/login?redirect=/account/addresses');
+  }
+}
+---
+
+<AccountLayout title="Addresses">
+  <AddressList client:load />
+</AccountLayout>

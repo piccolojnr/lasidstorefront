@@ -130,3 +130,65 @@ export const apiClient = {
     return { data: envelope.data ?? [], meta: envelope.meta };
   },
 };
+
+/**
+ * Server-side API client for use inside Astro page frontmatter.
+ * Forwards the incoming request's Cookie header so the session is preserved.
+ * Does NOT inject cart token or CSRF (not needed for authenticated server reads).
+ */
+export function createServerClient(cookieHeader: string) {
+  async function serverRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
+    const res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Cookie: cookieHeader,
+      },
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
+
+    const envelope = (await res.json()) as ApiEnvelope<T>;
+
+    if (!res.ok || !envelope.success) {
+      throw new ApiError(
+        res.status,
+        envelope.message ?? 'An unexpected error occurred.',
+        envelope.errors,
+        envelope.data,
+      );
+    }
+
+    return envelope.data as T;
+  }
+
+  async function serverPaginated<T>(path: string): Promise<PaginatedResult<T>> {
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Cookie: cookieHeader,
+      },
+    });
+
+    const envelope = (await res.json()) as PaginatedEnvelope<T>;
+
+    if (!res.ok || !envelope.success) {
+      throw new ApiError(
+        res.status,
+        envelope.message ?? 'An unexpected error occurred.',
+        envelope.errors,
+        envelope.data,
+      );
+    }
+
+    return { data: envelope.data ?? [], meta: envelope.meta };
+  }
+
+  return {
+    get: <T>(path: string) => serverRequest<T>('GET', path),
+    post: <T>(path: string, body?: unknown) => serverRequest<T>('POST', path, body),
+    paginated: <T>(path: string) => serverPaginated<T>(path),
+  };
+}

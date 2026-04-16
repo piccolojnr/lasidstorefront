@@ -1,0 +1,27 @@
+---
+import AccountLayout from '../../layouts/account-layout.astro';
+import ProfileForm from '../../components/account/profile-form';
+import { createServerClient, ApiError } from '../../api/client';
+import type { SessionUser } from '../../stores/session-store';
+
+const cookieHeader = Astro.request.headers.get('cookie') ?? '';
+const api = createServerClient(cookieHeader);
+
+let user: SessionUser | null = null;
+
+try {
+  user = await api.get<SessionUser>('/profile');
+} catch (err) {
+  if (err instanceof ApiError && err.status === 401) {
+    return Astro.redirect('/auth/login?redirect=/account');
+  }
+}
+---
+
+<AccountLayout title="Profile">
+  {user ? (
+    <ProfileForm client:load />
+  ) : (
+    <p class="text-sm text-gray-500">Could not load profile. Please refresh.</p>
+  )}
+</AccountLayout>

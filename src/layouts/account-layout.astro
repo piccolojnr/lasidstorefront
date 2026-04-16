@@ -1,0 +1,51 @@
+---
+import Layout from './layout.astro';
+import { ROUTES } from '../lib/constants';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const pathname = Astro.url.pathname;
+
+const nav = [
+  { href: ROUTES.accountOrders, label: 'Orders' },
+  { href: '/account/addresses', label: 'Addresses' },
+  { href: ROUTES.accountOrders.replace('/orders', ''), label: 'Profile' },
+];
+---
+
+<Layout title={title}>
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <div class="grid gap-8 lg:grid-cols-[220px_1fr]">
+
+      <!-- Sidebar -->
+      <aside class="flex flex-col gap-1">
+        <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
+          My account
+        </p>
+        {nav.map(({ href, label }) => (
+          <a
+            href={href}
+            class:list={[
+              'rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+              pathname === href || (href !== '/account' && pathname.startsWith(href))
+                ? 'bg-gray-100 text-gray-900'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900',
+            ]}
+          >
+            {label}
+          </a>
+        ))}
+      </aside>
+
+      <!-- Content -->
+      <div>
+        <h1 class="mb-7 text-xl font-bold tracking-tight text-gray-900">{title}</h1>
+        <slot />
+      </div>
+
+    </div>
+  </div>
+</Layout>

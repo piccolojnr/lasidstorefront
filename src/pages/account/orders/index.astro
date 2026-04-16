@@ -1,0 +1,80 @@
+---
+import AccountLayout from '../../../layouts/account-layout.astro';
+import { createServerClient, ApiError } from '../../../api/client';
+import { formatMoney } from '../../../lib/money';
+import type { Order } from '../../../api/checkout';
+
+const cookieHeader = Astro.request.headers.get('cookie') ?? '';
+const api = createServerClient(cookieHeader);
+
+let orders: Order[] = [];
+
+try {
+  const result = await api.paginated<Order>('/orders');
+  orders = result.data;
+} catch (err) {
+  if (err instanceof ApiError && err.status === 401) {
+    return Astro.redirect('/auth/login?redirect=/account/orders');
+  }
+}
+
+const statusStyles: Record<string, string> = {
+  pending: 'bg-yellow-50 text-yellow-700',
+  processing: 'bg-blue-50 text-blue-700',
+  completed: 'bg-green-50 text-green-700',
+  cancelled: 'bg-red-50 text-red-600',
+};
+
+const fulfillmentLabels: Record<string, string> = {
+  unfulfilled: 'Unfulfilled',
+  partially_fulfilled: 'Partially shipped',
+  fulfilled: 'Shipped',
+  returned: 'Returned',
+};
+---
+
+<AccountLayout title="Orders">
+  {orders.length === 0 ? (
+    <div class="py-16 text-center text-gray-400">
+      <p class="text-base">No orders yet.</p>
+      <a href="/products" class="mt-3 inline-block text-sm text-gray-500 underline underline-offset-2 hover:text-gray-700">
+        Start shopping
+      </a>
+    </div>
+  ) : (
+    <div class="flex flex-col divide-y divide-gray-100">
+      {orders.map((order) => (
+        <a
+          href={`/account/orders/${order.id}`}
+          class="flex flex-col gap-3 py-5 transition hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between -mx-4 px-4 rounded-xl"
+        >
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-semibold text-gray-900">{order.order_number}</p>
+              <span class:list={[
+                'rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
+                statusStyles[order.status] ?? 'bg-gray-100 text-gray-600',
+              ]}>
+                {order.status}
+              </span>
+            </div>
+            <p class="text-xs text-gray-400">
+              {new Date(order.placed_at).toLocaleDateString('en-GH', {
+                year: 'numeric', month: 'long', day: 'numeric',
+              })}
+              {order.fulfillment_status !== 'unfulfilled' && (
+                <> · {fulfillmentLabels[order.fulfillment_status] ?? order.fulfillment_status}</>
+              )}
+            </p>
+          </div>
+          <div class="flex items-center gap-4 text-sm">
+            <span class="font-semibold text-gray-900">{formatMoney(order.total_amount)}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </div>
+        </a>
+      ))}
+    </div>
+  )}
+</AccountLayout>
