@@ -16,8 +16,8 @@ const { categories, activeSlug, baseUrl = '/products' } = Astro.props;
     class:list={[
       'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
       !activeSlug
-        ? 'border-gray-900 bg-gray-900 text-white'
-        : 'border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900',
+        ? 'border-primary bg-primary text-primary-foreground'
+        : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground',
     ]}
   >
     All
@@ -28,8 +28,8 @@ const { categories, activeSlug, baseUrl = '/products' } = Astro.props;
       class:list={[
         'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
         activeSlug === cat.slug
-          ? 'border-gray-900 bg-gray-900 text-white'
-          : 'border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900',
+          ? 'border-primary bg-primary text-primary-foreground'
+          : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground',
       ]}
     >
       {cat.name}

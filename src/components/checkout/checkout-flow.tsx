@@ -328,15 +328,15 @@ function StepHeader({ step, label, onBack }: { step: number; label: string; onBa
       <div className="bg-primary text-primary-foreground flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold">
         {step}
       </div>
-      <h2 className="text-base font-semibold text-gray-900">{label}</h2>
+      <h2 className="font-heading text-base font-semibold text-foreground">{label}</h2>
     </div>
   );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-gray-100 p-4">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">{title}</p>
+    <div className="rounded-xl border border-border p-4">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{title}</p>
       {children}
     </div>
   );
@@ -354,7 +354,7 @@ function Row({
   className?: string;
 }) {
   return (
-    <div className={['flex justify-between', bold ? 'font-semibold text-gray-900' : 'text-gray-600', className].join(' ')}>
+    <div className={['flex justify-between', bold ? 'font-semibold text-foreground' : 'text-muted-foreground', className].join(' ')}>
       <span>{label}</span>
       <span>{value}</span>
     </div>

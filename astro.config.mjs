@@ -12,4 +12,9 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  server: {
+    host: true,
+    port: 4321,
+    allowedHosts: ['storefront.lasidcommerce.test'],
+  },
 });

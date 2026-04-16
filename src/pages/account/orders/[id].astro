@@ -31,17 +31,17 @@ try {
 if (!order) return Astro.redirect('/account/orders');
 
 const statusStyles: Record<string, string> = {
-  pending: 'bg-yellow-50 text-yellow-700',
+  pending:    'bg-amber-50 text-amber-700',
   processing: 'bg-blue-50 text-blue-700',
-  completed: 'bg-green-50 text-green-700',
-  cancelled: 'bg-red-50 text-red-600',
+  completed:  'bg-green-50 text-green-700',
+  cancelled:  'bg-red-50 text-red-600',
 };
 
 const paymentStyles: Record<string, string> = {
-  pending: 'text-yellow-600',
-  paid: 'text-green-600',
-  failed: 'text-red-600',
-  refunded: 'text-gray-500',
+  pending:  'text-amber-600',
+  paid:     'text-green-600',
+  failed:   'text-destructive',
+  refunded: 'text-muted-foreground',
 };
 ---
 
@@ -53,18 +53,18 @@ const paymentStyles: Record<string, string> = {
       <div class="flex flex-wrap items-center gap-2">
         <span class:list={[
           'rounded-full px-3 py-1 text-sm font-medium capitalize',
-          statusStyles[order.status] ?? 'bg-gray-100 text-gray-600',
+          statusStyles[order.status] ?? 'bg-muted text-muted-foreground',
         ]}>
           {order.status}
         </span>
         <span class:list={[
           'text-sm font-medium capitalize',
-          paymentStyles[order.payment_status] ?? 'text-gray-500',
+          paymentStyles[order.payment_status] ?? 'text-muted-foreground',
         ]}>
           Payment: {order.payment_status}
         </span>
       </div>
-      <p class="text-sm text-gray-400">
+      <p class="text-sm text-muted-foreground">
         Placed {new Date(order.placed_at).toLocaleDateString('en-GH', {
           year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
         })}
@@ -74,18 +74,18 @@ const paymentStyles: Record<string, string> = {
     <!-- Items -->
     {order.items.length > 0 && (
       <section>
-        <h2 class="mb-4 text-sm font-semibold text-gray-700">Items</h2>
-        <div class="flex flex-col divide-y divide-gray-100 rounded-xl border border-gray-100">
+        <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Items</h2>
+        <div class="flex flex-col divide-y divide-border rounded-xl border border-border">
           {order.items.map((item) => (
             <div class="flex items-start justify-between gap-4 px-5 py-4">
               <div class="flex flex-col gap-0.5 text-sm">
-                <p class="font-medium text-gray-900">{item.product_name_snapshot}</p>
+                <p class="font-medium text-foreground">{item.product_name_snapshot}</p>
                 {item.variant_name_snapshot && (
-                  <p class="text-gray-400">{item.variant_name_snapshot}</p>
+                  <p class="text-muted-foreground">{item.variant_name_snapshot}</p>
                 )}
-                <p class="text-gray-400">Qty: {item.quantity} × {formatMoney(item.unit_price)}</p>
+                <p class="text-muted-foreground">Qty: {item.quantity} × {formatMoney(item.unit_price)}</p>
               </div>
-              <p class="text-sm font-semibold text-gray-900 shrink-0">
+              <p class="text-sm font-semibold text-foreground shrink-0">
                 {formatMoney(item.line_total)}
               </p>
             </div>
@@ -96,10 +96,10 @@ const paymentStyles: Record<string, string> = {
 
     <!-- Totals + Shipping -->
     <div class="grid gap-6 sm:grid-cols-2">
-      <section class="rounded-xl border border-gray-100 p-5">
-        <h2 class="mb-4 text-xs font-semibold uppercase tracking-wide text-gray-400">Order total</h2>
+      <section class="rounded-xl border border-border p-5">
+        <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Order total</h2>
         <div class="flex flex-col gap-2 text-sm">
-          <div class="flex justify-between text-gray-600">
+          <div class="flex justify-between text-muted-foreground">
             <span>Subtotal</span><span>{formatMoney(order.subtotal_amount)}</span>
           </div>
           {order.discount_amount > 0 && (
@@ -108,33 +108,33 @@ const paymentStyles: Record<string, string> = {
             </div>
           )}
           {order.tax_amount > 0 && (
-            <div class="flex justify-between text-gray-600">
+            <div class="flex justify-between text-muted-foreground">
               <span>Tax</span><span>{formatMoney(order.tax_amount)}</span>
             </div>
           )}
-          <div class="flex justify-between text-gray-600">
+          <div class="flex justify-between text-muted-foreground">
             <span>Shipping</span><span>{formatMoney(order.shipping_amount)}</span>
           </div>
-          <hr class="border-gray-100" />
-          <div class="flex justify-between font-semibold text-gray-900">
+          <hr class="border-border" />
+          <div class="flex justify-between font-semibold text-foreground">
             <span>Total</span><span>{formatMoney(order.total_amount)}</span>
           </div>
         </div>
       </section>
 
       {order.shipping_address && (
-        <section class="rounded-xl border border-gray-100 p-5">
-          <h2 class="mb-4 text-xs font-semibold uppercase tracking-wide text-gray-400">Delivery address</h2>
+        <section class="rounded-xl border border-border p-5">
+          <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Delivery address</h2>
           <div class="flex flex-col gap-0.5 text-sm">
-            <p class="font-medium text-gray-900">{order.shipping_address.name}</p>
+            <p class="font-medium text-foreground">{order.shipping_address.name}</p>
             {order.shipping_address.address_line_1 && (
-              <p class="text-gray-500">{order.shipping_address.address_line_1}</p>
+              <p class="text-muted-foreground">{order.shipping_address.address_line_1}</p>
             )}
             {order.shipping_address.city && (
-              <p class="text-gray-500">{order.shipping_address.city}</p>
+              <p class="text-muted-foreground">{order.shipping_address.city}</p>
             )}
             {order.shipping_method_name && (
-              <p class="mt-2 text-xs text-gray-400">via {order.shipping_method_name}</p>
+              <p class="mt-2 text-xs text-muted-foreground">via {order.shipping_method_name}</p>
             )}
           </div>
         </section>
@@ -144,13 +144,13 @@ const paymentStyles: Record<string, string> = {
     <!-- Timeline -->
     {timeline.length > 0 && (
       <section>
-        <h2 class="mb-4 text-sm font-semibold text-gray-700">Tracking</h2>
-        <ol class="relative border-l border-gray-200 pl-5">
-          {timeline.map((event, i) => (
-            <li class:list={['pb-5', i === timeline.length - 1 ? '' : '']}>
-              <div class="absolute -left-[5px] mt-1.5 h-2.5 w-2.5 rounded-full border border-white bg-gray-900" />
-              <p class="text-sm font-medium text-gray-900">{event.label}</p>
-              <p class="text-xs text-gray-400">
+        <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Tracking</h2>
+        <ol class="relative border-l border-border pl-5">
+          {timeline.map((event) => (
+            <li class="pb-5">
+              <div class="absolute -left-[5px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-foreground" />
+              <p class="text-sm font-medium text-foreground">{event.label}</p>
+              <p class="text-xs text-muted-foreground">
                 {new Date(event.occurred_at).toLocaleString('en-GH', {
                   year: 'numeric', month: 'short', day: 'numeric',
                   hour: '2-digit', minute: '2-digit',
@@ -165,12 +165,12 @@ const paymentStyles: Record<string, string> = {
     <!-- Notes -->
     {order.notes && (
       <section>
-        <h2 class="mb-2 text-sm font-semibold text-gray-700">Order notes</h2>
-        <p class="text-sm text-gray-500">{order.notes}</p>
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Order notes</h2>
+        <p class="text-sm text-muted-foreground">{order.notes}</p>
       </section>
     )}
 
-    <a href="/account/orders" class="self-start text-sm text-gray-400 transition hover:text-gray-600">
+    <a href="/account/orders" class="self-start text-sm text-muted-foreground hover:text-foreground transition-colors">
       ← Back to orders
     </a>
 

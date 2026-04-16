@@ -15,7 +15,7 @@ const options = [
 <select
   name="sort"
   onchange="this.form && this.form.submit()"
-  class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900"
+  class="rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
 >
   {options.map((opt) => (
     <option value={opt.value} selected={opt.value === value}>

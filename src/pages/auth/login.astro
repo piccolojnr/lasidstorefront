@@ -3,8 +3,6 @@ import Layout from "../../layouts/layout.astro";
 import LoginForm from "../../components/auth/login-form";
 import { ROUTES } from "../../lib/constants";
 
-// If already authenticated, redirect to account
-// (full check is done client-side via the session store)
 const redirectTo =
   Astro.url.searchParams.get("redirect") ?? ROUTES.accountOrders;
 ---
@@ -13,10 +11,9 @@ const redirectTo =
   <div class="flex min-h-[80dvh] items-center justify-center px-4 py-16">
     <div class="w-full max-w-sm">
       <div class="mb-8 text-center">
-        <a href="/" class="text-2xl font-bold tracking-tight">Lasid</a>
-        <p class="mt-2 text-sm text-gray-500">Sign in to your account</p>
+        <a href="/" class="font-heading text-2xl font-bold tracking-tight text-foreground">Lasid</a>
+        <p class="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
       </div>
-
       <LoginForm client:load redirectTo={redirectTo} />
     </div>
   </div>

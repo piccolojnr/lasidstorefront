@@ -1,13 +1,8 @@
 ---
 import Layout from '../../layouts/layout.astro';
-import { createServerClient } from '../../api/client';
-import { ApiError } from '../../api/client';
+import { createServerClient, ApiError } from '../../api/client';
 import { formatMoney } from '../../lib/money';
 import type { Order } from '../../api/checkout';
-
-// Paystack redirects back with ?reference=PSK-REF-xxx
-// We find the matching order by polling the orders list.
-// If no reference, show a generic confirmation.
 
 const cookieHeader = Astro.request.headers.get('cookie') ?? '';
 const api = createServerClient(cookieHeader);
@@ -16,7 +11,6 @@ let order: Order | null = null;
 
 try {
   const { data } = await api.paginated<Order>('/orders');
-  // Most recent order is first
   order = data[0] ?? null;
 } catch (err) {
   if (err instanceof ApiError && err.status === 401) {
@@ -37,36 +31,36 @@ try {
       </div>
 
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Order confirmed!</h1>
+        <h1 class="font-heading text-2xl font-bold text-foreground">Order confirmed!</h1>
         {order ? (
-          <p class="mt-2 text-sm text-gray-500">
-            Order <span class="font-medium text-gray-700">{order.order_number}</span> is being processed.
+          <p class="mt-2 text-sm text-muted-foreground">
+            Order <span class="font-medium text-foreground">{order.order_number}</span> is being processed.
           </p>
         ) : (
-          <p class="mt-2 text-sm text-gray-500">Your payment was received and your order is being processed.</p>
+          <p class="mt-2 text-sm text-muted-foreground">Your payment was received and your order is being processed.</p>
         )}
       </div>
 
       {order && (
-        <div class="w-full rounded-xl border border-gray-100 p-5 text-left">
-          <p class="mb-4 text-xs font-semibold uppercase tracking-wide text-gray-400">Summary</p>
+        <div class="w-full rounded-xl border border-border p-5 text-left">
+          <p class="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Summary</p>
           <div class="flex flex-col gap-2 text-sm">
             {order.shipping_address && (
               <div class="flex justify-between">
-                <span class="text-gray-500">Delivering to</span>
-                <span class="font-medium text-gray-900 text-right max-w-[60%]">
+                <span class="text-muted-foreground">Delivering to</span>
+                <span class="font-medium text-foreground text-right max-w-[60%]">
                   {order.shipping_address.name}
                 </span>
               </div>
             )}
             {order.shipping_method_name && (
               <div class="flex justify-between">
-                <span class="text-gray-500">Shipping</span>
-                <span class="text-gray-900">{order.shipping_method_name}</span>
+                <span class="text-muted-foreground">Shipping</span>
+                <span class="text-foreground">{order.shipping_method_name}</span>
               </div>
             )}
-            <hr class="border-gray-100" />
-            <div class="flex justify-between font-semibold">
+            <hr class="border-border" />
+            <div class="flex justify-between font-semibold text-foreground">
               <span>Total paid</span>
               <span>{formatMoney(order.total_amount)}</span>
             </div>
@@ -78,14 +72,14 @@ try {
         {order && (
           <a
             href={`/account/orders/${order.id}`}
-            class="rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700"
+            class="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Track order
           </a>
         )}
         <a
           href="/products"
-          class="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 transition hover:border-gray-400"
+          class="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
         >
           Continue shopping
         </a>

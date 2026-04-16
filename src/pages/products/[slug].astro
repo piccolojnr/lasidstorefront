@@ -27,21 +27,21 @@ const discountPct = hasDiscount
 ---
 
 <Layout title={product.name} description={product.short_description ?? undefined}>
-  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
     <!-- Breadcrumb -->
-    <nav class="mb-8 flex items-center gap-2 text-sm text-gray-400">
-      <a href="/products" class="hover:text-gray-600 transition-colors">Shop</a>
+    <nav class="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+      <a href="/products" class="hover:text-foreground transition-colors">Shop</a>
       {product.category && (
         <>
           <span>/</span>
-          <a href={`/products?category=${product.category.slug}`} class="hover:text-gray-600 transition-colors">
+          <a href={`/products?category=${product.category.slug}`} class="hover:text-foreground transition-colors">
             {product.category.name}
           </a>
         </>
       )}
       <span>/</span>
-      <span class="text-gray-700">{product.name}</span>
+      <span class="text-foreground">{product.name}</span>
     </nav>
 
     <!-- Main product section -->
@@ -49,7 +49,7 @@ const discountPct = hasDiscount
 
       <!-- Image gallery -->
       <div class="flex flex-col gap-3">
-        <div class="aspect-square overflow-hidden rounded-2xl bg-gray-50">
+        <div class="aspect-square overflow-hidden rounded-2xl bg-muted">
           {primaryImage ? (
             <img
               src={primaryImage.url}
@@ -57,7 +57,7 @@ const discountPct = hasDiscount
               class="h-full w-full object-cover"
             />
           ) : (
-            <div class="flex h-full items-center justify-center text-gray-300">
+            <div class="flex h-full items-center justify-center text-muted-foreground/30">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
               </svg>
@@ -72,7 +72,7 @@ const discountPct = hasDiscount
               <div
                 class:list={[
                   'aspect-square overflow-hidden rounded-lg border-2',
-                  img.is_primary ? 'border-gray-900' : 'border-transparent',
+                  img.is_primary ? 'border-foreground' : 'border-transparent',
                 ]}
               >
                 <img src={img.url} alt="" class="h-full w-full object-cover" loading="lazy" />
@@ -85,17 +85,17 @@ const discountPct = hasDiscount
       <!-- Product info -->
       <div class="flex flex-col gap-5">
         {product.brand && (
-          <p class="text-sm font-medium uppercase tracking-widest text-gray-400">
+          <p class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {product.brand.name}
           </p>
         )}
 
         <div>
-          <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+          <h1 class="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {product.name}
           </h1>
           {product.short_description && (
-            <p class="mt-3 text-base text-gray-500 leading-relaxed">
+            <p class="mt-3 text-base text-muted-foreground leading-relaxed">
               {product.short_description}
             </p>
           )}
@@ -103,22 +103,22 @@ const discountPct = hasDiscount
 
         <!-- Price -->
         <div class="flex items-baseline gap-3">
-          <span class="text-2xl font-bold text-gray-900">
+          <span class="text-2xl font-bold text-foreground">
             {formatMoney(product.base_price)}
           </span>
           {hasDiscount && (
             <>
-              <span class="text-base text-gray-400 line-through">
+              <span class="text-base text-muted-foreground line-through">
                 {formatMoney(product.compare_at_price!)}
               </span>
-              <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-sm font-semibold text-gray-700">
+              <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-semibold text-primary">
                 -{discountPct}%
               </span>
             </>
           )}
         </div>
 
-        <hr class="border-gray-100" />
+        <hr class="border-border" />
 
         <!-- Add to cart island -->
         <AddToCart
@@ -128,16 +128,16 @@ const discountPct = hasDiscount
         />
 
         <!-- SKU -->
-        <p class="text-xs text-gray-400">SKU: {product.sku}</p>
+        <p class="text-xs text-muted-foreground">SKU: {product.sku}</p>
 
         <!-- Full description -->
         {product.description && (
-          <div class="pt-4 border-t border-gray-100">
-            <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-700">
+          <div class="pt-4 border-t border-border">
+            <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Description
             </h2>
             <div
-              class="prose prose-sm max-w-none text-gray-600"
+              class="prose prose-sm max-w-none text-muted-foreground"
               set:html={product.description}
             />
           </div>
@@ -148,14 +148,14 @@ const discountPct = hasDiscount
     <!-- Related products -->
     {product.related_products.length > 0 && (
       <section class="mt-20">
-        <h2 class="mb-6 text-lg font-semibold text-gray-900">You may also like</h2>
+        <h2 class="font-heading mb-6 text-lg font-semibold text-foreground">You may also like</h2>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
           {product.related_products.map((related) => (
             <a
               href={`/products/${related.slug}`}
-              class="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition hover:shadow-md"
+              class="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div class="aspect-square overflow-hidden bg-gray-50">
+              <div class="aspect-square overflow-hidden bg-muted">
                 {related.primary_image_url ? (
                   <img
                     src={related.primary_image_url}
@@ -164,16 +164,16 @@ const discountPct = hasDiscount
                     loading="lazy"
                   />
                 ) : (
-                  <div class="flex h-full items-center justify-center text-gray-200">
+                  <div class="flex h-full items-center justify-center text-muted-foreground/30">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                     </svg>
                   </div>
                 )}
               </div>
               <div class="p-3">
-                <p class="line-clamp-2 text-sm font-medium text-gray-900">{related.name}</p>
-                <p class="mt-1 text-sm font-semibold">{formatMoney(related.base_price)}</p>
+                <p class="line-clamp-2 text-sm font-medium text-foreground">{related.name}</p>
+                <p class="mt-1 text-sm font-semibold text-foreground">{formatMoney(related.base_price)}</p>
               </div>
             </a>
           ))}
