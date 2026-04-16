@@ -16,8 +16,9 @@ export interface ShippingMethod {
 }
 
 export interface ShippingResolvePayload {
-  country: string;
-  city: string;
+  shipping_zone_id?: number;
+  country?: string;
+  city?: string;
   region?: string;
   cart_id?: number;
 }

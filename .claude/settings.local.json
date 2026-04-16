@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Read(//c/Users/USER/projects/ecommerce/lasidcommerce/app/Providers/**)",
+      "Read(//c/Users/USER/projects/ecommerce/lasidcommerce/bootstrap/**)",
+      "Bash(xargs ls:*)"
     ]
   }
 }

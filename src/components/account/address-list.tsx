@@ -89,6 +89,11 @@ export default function AddressList() {
                 {addr.is_default && (
                   <span className="bg-muted text-muted-foreground mt-1 w-fit rounded-full px-2 py-0.5 text-xs">Default</span>
                 )}
+                {!addr.shipping_zone_id && (
+                  <span className="mt-1 w-fit rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+                    No shipping zone — update before checkout
+                  </span>
+                )}
               </div>
               <div className="flex shrink-0 gap-1">
                 <Button variant="ghost" size="xs" onClick={() => setEditingId(addr.id)}>Edit</Button>

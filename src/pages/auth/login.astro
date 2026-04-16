@@ -5,6 +5,13 @@ import { ROUTES } from "../../lib/constants";
 
 const redirectTo =
   Astro.url.searchParams.get("redirect") ?? ROUTES.accountOrders;
+
+const authError = Astro.url.searchParams.get("auth_error");
+const authErrorMessages: Record<string, string> = {
+  invalid_or_expired_link: "This sign-in link has expired or already been used. Request a new one.",
+  account_not_available: "This account is not available on the storefront.",
+};
+const authErrorMessage = authError ? (authErrorMessages[authError] ?? "Sign-in failed. Please try again.") : null;
 ---
 
 <Layout title="Sign in">
@@ -14,6 +21,11 @@ const redirectTo =
         <a href="/" class="font-heading text-2xl font-bold tracking-tight text-foreground">Lasid</a>
         <p class="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
       </div>
+      {authErrorMessage && (
+        <div class="mb-4 rounded-lg bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
+          {authErrorMessage}
+        </div>
+      )}
       <LoginForm client:load redirectTo={redirectTo} />
     </div>
   </div>

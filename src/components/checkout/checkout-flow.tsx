@@ -37,12 +37,11 @@ export default function CheckoutFlow() {
     setError('');
     setLoading(true);
     try {
-      const result = await checkoutApi.resolveShipping({
-        country: address.country,
-        city: address.city,
-        region: address.region ?? undefined,
-        cart_id: cart?.items[0] ? undefined : undefined,
-      });
+      const payload = address.shipping_zone_id
+        ? { shipping_zone_id: address.shipping_zone_id }
+        : { country: address.country, city: address.city, region: address.region ?? undefined };
+
+      const result = await checkoutApi.resolveShipping(payload);
       setShippingMethods(result.shipping_methods);
       setSelectedMethod(result.shipping_methods[0] ?? null);
       setStep('shipping');
@@ -144,9 +143,17 @@ export default function CheckoutFlow() {
                     <span className="text-muted-foreground">
                       {[addr.district, addr.city, addr.region].filter(Boolean).join(', ')}
                     </span>
+                    {addr.shipping_zone && (
+                      <span className="text-muted-foreground text-xs">{addr.shipping_zone.name}</span>
+                    )}
                     {addr.phone && <span className="text-muted-foreground">{addr.phone}</span>}
                     {addr.is_default && (
                       <span className="bg-muted text-muted-foreground mt-1 w-fit rounded-full px-2 py-0.5 text-xs">Default</span>
+                    )}
+                    {!addr.shipping_zone_id && (
+                      <span className="mt-1 w-fit rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+                        No shipping zone
+                      </span>
                     )}
                   </button>
                 ))}

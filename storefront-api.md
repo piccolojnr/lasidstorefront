@@ -95,6 +95,20 @@ Paginated responses also include `meta`:
 - `422` for validation and business-rule failures
 - `502` when checkout is created but payment initialization fails
 
+## Session-backed Public Routes
+
+These routes do not require an authenticated customer, but they do run inside the storefront session middleware because they create or update session state.
+
+- `GET /api/v1/auth/csrf-cookie`
+- `GET /api/v1/auth/session`
+- `POST /api/v1/auth/logout`
+- `POST /api/v1/auth/magic-link/request`
+- `GET /api/v1/auth/magic-link/verify`
+- `POST /api/v1/auth/password/login`
+- `POST /api/v1/auth/password/forgot`
+- `POST /api/v1/auth/password/reset`
+- `POST /api/v1/checkout/guest/initialize`
+
 ## Public APIs
 
 These routes are available without a customer session.
@@ -472,6 +486,116 @@ If no zone matches, the request still succeeds with:
 
 - `shipping_zone = null`
 - `shipping_methods = []`
+
+### Guest Checkout
+
+#### `POST /api/v1/checkout/guest/initialize`
+
+Creates or resolves a storefront customer from the submitted email, logs that customer into the storefront session, saves the submitted shipping address as the default customer address, creates the order, and initializes payment.
+
+The storefront should call the CSRF bootstrap endpoint first and send the guest cart token through `X-Cart-Token`.
+
+Request body:
+
+```json
+{
+  "email": "guest@example.test",
+  "name": "Ada Doe",
+  "phone": "+233240000000",
+  "country": "Ghana",
+  "region": "Greater Accra",
+  "city": "Accra",
+  "district": "Osu",
+  "address_line_1": "12 Market Street",
+  "address_line_2": null,
+  "landmark": "Near the pharmacy",
+  "postal_code": "GA-123-4567",
+  "shipping_method_id": 7,
+  "payment_provider": "paystack",
+  "notes": "Leave at reception",
+  "delivery_notes": "Call on arrival"
+}
+```
+
+Validation:
+
+- `email` required
+- `name` required
+- `country` required
+- `city` required
+- `address_line_1` required
+- `shipping_method_id` required
+- `payment_provider` required, currently `paystack`
+- `phone`, `region`, `district`, `address_line_2`, `landmark`, `postal_code`, `notes`, `delivery_notes`, `coupon_code` optional
+
+Example success response:
+
+```json
+{
+  "success": true,
+  "message": null,
+  "data": {
+    "order": {
+      "id": 101,
+      "order_number": "ORD-2026-000101",
+      "status": "pending",
+      "payment_status": "unpaid",
+      "fulfillment_status": "unfulfilled",
+      "currency_code": "GHS",
+      "subtotal_amount": 500000,
+      "discount_amount": 0,
+      "tax_amount": 0,
+      "shipping_amount": 25000,
+      "total_amount": 525000,
+      "shipping_zone_name": "Accra Metro",
+      "shipping_method_name": "Standard Delivery",
+      "notes": "Leave at reception",
+      "delivery_notes": "Call on arrival",
+      "placed_at": "2026-04-15T12:30:00.000000Z",
+      "items": [],
+      "shipping_address": {
+        "type": "shipping",
+        "name": "Ada Doe"
+      }
+    },
+    "payment": {
+      "provider": "paystack",
+      "authorization_url": "https://checkout.paystack.com/...",
+      "access_code": "ACCESS_CODE",
+      "reference": "PSK-REF-123"
+    }
+  },
+  "errors": null
+}
+```
+
+Behavior:
+
+- rejects platform users and staff emails
+- creates a brand-new storefront customer if the email is new
+- reuses an existing storefront customer if the email already belongs to a customer account
+- logs the resolved customer into the storefront session before the response is returned
+- saves the submitted checkout address onto the customer account as the default shipping address
+- merges the guest cart into the existing customer cart when the email already belongs to a customer with an active cart
+- sends the same order/payment notifications as the standard checkout flow
+
+Example failure response when order creation succeeds but payment initialization fails:
+
+```json
+{
+  "success": false,
+  "message": "Checkout was created, but payment initialization failed.",
+  "data": null,
+  "errors": {
+    "order_id": 101,
+    "payment": "Gateway timeout"
+  }
+}
+```
+
+If that happens, the customer session is still established and the storefront can retry payment initialization with the existing authenticated route:
+
+- `POST /api/v1/payments/initialize`
 
 ## Storefront Auth
 
@@ -1044,7 +1168,18 @@ Example response:
     "phone": "+233240000000",
     "status": "active",
     "email_verified_at": "2026-04-10T12:00:00.000000Z",
-    "profile_completion_required": false
+    "profile_completion_required": false,
+    "notification_preferences": {
+      "auth_magic_link": true,
+      "auth_verify_email": true,
+      "auth_password_reset": true,
+      "auth_welcome": true,
+      "orders_placed": true,
+      "orders_status_updates": true,
+      "payments_action_required": true,
+      "payments_received": true,
+      "shipments_status_updates": true
+    }
   },
   "errors": null
 }
@@ -1062,7 +1197,11 @@ Request body:
   "phone": "+233240000000",
   "email": "ada@example.test",
   "password": "new-secret-password",
-  "password_confirmation": "new-secret-password"
+  "password_confirmation": "new-secret-password",
+  "notification_preferences": {
+    "orders_placed": false,
+    "payments_received": false
+  }
 }
 ```
 
@@ -1072,6 +1211,7 @@ Validation:
 - `phone` optional
 - `email` optional, must be unique
 - `password` optional, minimum 8 characters, confirmed
+- `notification_preferences` optional object of boolean flags
 
 If the email changes, email verification is cleared.
 
@@ -1115,8 +1255,8 @@ Validation failures return the `errors` envelope.
 3. Browse catalog and build the guest cart.
 4. Resolve shipping methods with the shipping endpoint.
 5. Preview checkout.
-6. Create the order or initialize checkout directly.
-7. Initialize payment.
+6. If authenticated, use standard checkout preview/create/initialize.
+7. If not authenticated, use guest checkout initialize with the guest cart token and shipping/contact details.
 8. Redirect to the payment provider if needed.
 9. Poll order detail or timeline after return from payment.
 

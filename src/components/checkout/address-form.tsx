@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { addressesApi, type Address, type AddressPayload } from '@/api/addresses';
+import { Select } from '@/components/ui/select';
+import { addressesApi, type Address, type AddressPayload, type ShippingZoneSummary } from '@/api/addresses';
 import { ApiError } from '@/api/client';
 
 interface Props {
@@ -24,6 +25,8 @@ const EMPTY: AddressPayload = {
   landmark: '',
   postal_code: '',
   is_default: false,
+  shipping_zone_id: null,
+  shipping_zone_area_id: null,
 };
 
 export default function AddressForm({ initial, onSaved, onCancel }: Props) {
@@ -31,8 +34,13 @@ export default function AddressForm({ initial, onSaved, onCancel }: Props) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [errorMsg, setErrorMsg] = useState('');
+  const [zones, setZones] = useState<ShippingZoneSummary[]>([]);
 
   const isEdit = !!initial?.id;
+
+  useEffect(() => {
+    addressesApi.listZones().then(setZones).catch(() => setZones([]));
+  }, []);
 
   function set(key: keyof AddressPayload, value: string | boolean) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -91,22 +99,75 @@ export default function AddressForm({ initial, onSaved, onCancel }: Props) {
     );
   }
 
+  const selectedZone = zones.find((z) => z.id === form.shipping_zone_id) ?? null;
+  const areaOptions = selectedZone?.areas ?? [];
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4">
         <Field id="name" label="Full name" required />
         <Field id="phone" label="Phone" />
       </div>
+
+      {/* Zone */}
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="shipping_zone_id">
+          Shipping zone<span className="text-destructive ml-0.5">*</span>
+        </Label>
+        <Select
+          id="shipping_zone_id"
+          value={form.shipping_zone_id ?? ''}
+          onChange={(e) => {
+            const id = e.target.value ? Number(e.target.value) : null;
+            setForm((f) => ({ ...f, shipping_zone_id: id, shipping_zone_area_id: null }));
+          }}
+          required
+          aria-invalid={!!fieldErrors.shipping_zone_id?.[0]}
+        >
+          <option value="">— Select zone —</option>
+          {zones.map((z) => (
+            <option key={z.id} value={z.id}>{z.name}</option>
+          ))}
+        </Select>
+        {fieldErrors.shipping_zone_id?.[0] && (
+          <p className="text-destructive text-xs">{fieldErrors.shipping_zone_id[0]}</p>
+        )}
+      </div>
+
+      {/* Area — shown only once a zone is selected */}
+      {selectedZone && (
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="shipping_zone_area_id">Area</Label>
+          <Select
+            id="shipping_zone_area_id"
+            value={form.shipping_zone_area_id ?? ''}
+            onChange={(e) => {
+              const id = e.target.value ? Number(e.target.value) : null;
+              setForm((f) => ({ ...f, shipping_zone_area_id: id }));
+            }}
+            aria-invalid={!!fieldErrors.shipping_zone_area_id?.[0]}
+          >
+            <option value="">— Select area —</option>
+            {areaOptions.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.area_name}
+                {a.area_type !== 'country' ? ` (${a.area_type})` : ''}
+              </option>
+            ))}
+          </Select>
+          {fieldErrors.shipping_zone_area_id?.[0] && (
+            <p className="text-destructive text-xs">{fieldErrors.shipping_zone_area_id[0]}</p>
+          )}
+        </div>
+      )}
+
       <Field id="address_line_1" label="Address line 1" required />
       <Field id="address_line_2" label="Address line 2" />
       <div className="grid grid-cols-2 gap-4">
         <Field id="city" label="City" required />
         <Field id="district" label="District" />
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <Field id="region" label="Region" />
-        <Field id="postal_code" label="Postal code" />
-      </div>
+      <Field id="postal_code" label="Postal code" />
       <Field id="landmark" label="Landmark (optional)" />
 
       <label className="flex items-center gap-2 text-sm">
