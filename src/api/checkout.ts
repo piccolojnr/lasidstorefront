@@ -13,6 +13,7 @@ export interface ShippingMethod {
   code: string;
   min_delivery_days: number;
   max_delivery_days: number;
+  shipping_amount?: number;
 }
 
 export interface ShippingResolvePayload {
@@ -100,6 +101,26 @@ export interface CheckoutInitPayload {
   delivery_notes?: string;
 }
 
+export interface GuestCheckoutPayload {
+  email: string;
+  name: string;
+  phone?: string;
+  country?: string;
+  region?: string;
+  city?: string;
+  district?: string;
+  address_line_1: string;
+  address_line_2?: string;
+  landmark?: string;
+  postal_code?: string;
+  shipping_zone_id?: number | null;
+  shipping_zone_area_id?: number | null;
+  shipping_method_id: number;
+  payment_provider: 'paystack';
+  notes?: string;
+  delivery_notes?: string;
+}
+
 export const checkoutApi = {
   resolveShipping(payload: ShippingResolvePayload): Promise<ShippingResolveResult> {
     return apiClient.post<ShippingResolveResult>('/checkout/shipping-methods/resolve', payload);
@@ -123,5 +144,9 @@ export const checkoutApi = {
 
   initialize(payload: CheckoutInitPayload): Promise<CheckoutInitResult> {
     return apiClient.post<CheckoutInitResult>('/checkout/initialize', payload);
+  },
+
+  initializeGuest(payload: GuestCheckoutPayload): Promise<CheckoutInitResult> {
+    return apiClient.post<CheckoutInitResult>('/checkout/guest/initialize', payload);
   },
 };

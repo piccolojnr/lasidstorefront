@@ -5,19 +5,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { cartStore } from '@/stores/cart-store';
+import { sessionStore } from '@/stores/session-store';
 import { addressesApi, type Address } from '@/api/addresses';
-import { checkoutApi, type ShippingMethod, type CheckoutInitPayload } from '@/api/checkout';
+import { checkoutApi, type ShippingMethod, type CheckoutInitPayload, type GuestCheckoutPayload } from '@/api/checkout';
 import { paymentsApi } from '@/api/payments';
 import { ApiError } from '@/api/client';
 import { formatMoney } from '@/lib/money';
 import AddressForm from './address-form';
+import GuestCheckoutForm from './guest-checkout-form';
 
-type Step = 'address' | 'shipping' | 'review' | 'processing';
+type Step = 'gate' | 'guest-form' | 'address' | 'shipping' | 'review' | 'processing';
 
 export default function CheckoutFlow() {
   const cart = useStore(cartStore);
+  const session = useStore(sessionStore);
 
-  const [step, setStep] = useState<Step>('address');
+  const [step, setStep] = useState<Step>('gate');
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -27,10 +30,18 @@ export default function CheckoutFlow() {
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestData, setGuestData] = useState<Omit<GuestCheckoutPayload, 'shipping_method_id' | 'payment_provider'> | null>(null);
 
+  // Once session resolves, route to the right starting step
   useEffect(() => {
-    addressesApi.list().then(setAddresses).catch(() => setAddresses([]));
-  }, []);
+    if (session.loading) return;
+    if (session.authenticated) {
+      setStep('address');
+      addressesApi.list().then(setAddresses).catch(() => setAddresses([]));
+    }
+    // unauthenticated stays at 'gate'
+  }, [session.loading, session.authenticated]);
 
   async function handleAddressSelect(address: Address) {
     setSelectedAddress(address);
@@ -53,8 +64,16 @@ export default function CheckoutFlow() {
   }
 
   async function handleShippingConfirm() {
-    if (!selectedAddress || !selectedMethod) return;
+    if (!selectedMethod) return;
     setError('');
+
+    // Guests have no saved address — skip the preview API call
+    if (isGuest) {
+      setStep('review');
+      return;
+    }
+
+    if (!selectedAddress) return;
     setLoading(true);
     try {
       const result = await checkoutApi.preview(selectedAddress.id, selectedMethod.id);
@@ -68,20 +87,35 @@ export default function CheckoutFlow() {
   }
 
   async function handlePlaceOrder() {
-    if (!selectedAddress || !selectedMethod) return;
+    if (!selectedMethod) return;
     setStep('processing');
     setError('');
     try {
-      const payload: CheckoutInitPayload = {
-        address_id: selectedAddress.id,
-        shipping_method_id: selectedMethod.id,
-        payment_provider: 'paystack',
-        notes: notes || undefined,
-      };
-      const result = await checkoutApi.initialize(payload);
-      window.location.href = result.payment.authorization_url;
+      let authorizationUrl: string;
+
+      if (isGuest && guestData) {
+        const result = await checkoutApi.initializeGuest({
+          ...guestData,
+          shipping_method_id: selectedMethod.id,
+          payment_provider: 'paystack',
+          notes: notes || undefined,
+        });
+        authorizationUrl = result.payment.authorization_url;
+      } else {
+        if (!selectedAddress) return;
+        const payload: CheckoutInitPayload = {
+          address_id: selectedAddress.id,
+          shipping_method_id: selectedMethod.id,
+          payment_provider: 'paystack',
+          notes: notes || undefined,
+        };
+        const result = await checkoutApi.initialize(payload);
+        authorizationUrl = result.payment.authorization_url;
+      }
+
+      window.location.href = authorizationUrl;
     } catch (err) {
-      if (err instanceof ApiError && err.status === 502) {
+      if (!isGuest && err instanceof ApiError && err.status === 502) {
         // Order created but payment init failed — retry payment
         const orderId = (err.data as { order_id?: number } | null)?.order_id;
         if (orderId) {
@@ -113,6 +147,66 @@ export default function CheckoutFlow() {
     });
     setShowAddressForm(false);
     handleAddressSelect(address);
+  }
+
+  function handleGuestResolved(
+    data: Omit<GuestCheckoutPayload, 'shipping_method_id' | 'payment_provider'>,
+    methods: ShippingMethod[],
+  ) {
+    setIsGuest(true);
+    setGuestData(data);
+    setShippingMethods(methods);
+    setSelectedMethod(methods[0] ?? null);
+    setStep('shipping');
+  }
+
+  // ── Session loading ────────────────────────────────────────────────────────
+  if (session.loading) {
+    return (
+      <div className="flex flex-col gap-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="bg-muted h-16 animate-pulse rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  // ── Step: Gate ─────────────────────────────────────────────────────────────
+  if (step === 'gate') {
+    return (
+      <div className="flex flex-col gap-6">
+        <StepHeader step={1} label="How would you like to continue?" />
+
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => setStep('guest-form')}
+            className="border-border hover:border-foreground/40 flex flex-col gap-1 rounded-xl border p-5 text-left transition"
+          >
+            <span className="text-foreground font-medium">Continue as guest</span>
+            <span className="text-muted-foreground text-sm">No account needed. We'll email you a link to track your order.</span>
+          </button>
+
+          <a
+            href={`/auth/login?redirect=/checkout`}
+            className="border-border hover:border-foreground/40 flex flex-col gap-1 rounded-xl border p-5 text-left transition"
+          >
+            <span className="text-foreground font-medium">Sign in or create account</span>
+            <span className="text-muted-foreground text-sm">Access saved addresses and order history.</span>
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Step: Guest form ───────────────────────────────────────────────────────
+  if (step === 'guest-form') {
+    return (
+      <div className="flex flex-col gap-6">
+        <StepHeader step={1} label="Your details" onBack={() => setStep('gate')} />
+        <GuestCheckoutForm onResolved={handleGuestResolved} />
+      </div>
+    );
   }
 
   // ── Step: Address ──────────────────────────────────────────────────────────
@@ -186,7 +280,7 @@ export default function CheckoutFlow() {
   if (step === 'shipping') {
     return (
       <div className="flex flex-col gap-6">
-        <StepHeader step={2} label="Choose shipping method" onBack={() => setStep('address')} />
+        <StepHeader step={2} label="Choose shipping method" onBack={() => setStep(isGuest ? 'guest-form' : 'address')} />
 
         {shippingMethods.length === 0 ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
@@ -241,42 +335,54 @@ export default function CheckoutFlow() {
   }
 
   // ── Step: Review ───────────────────────────────────────────────────────────
-  if (step === 'review' && preview) {
-    const { totals, address, shipping_method } = preview;
+  if (step === 'review' && selectedMethod) {
+    // Derive address summary + totals from either the server preview (auth) or local state (guest)
+    const reviewAddress = isGuest && guestData
+      ? { name: guestData.name, address_line_1: guestData.address_line_1, district: guestData.district, city: guestData.city, region: guestData.region }
+      : preview?.address;
+
+    const subtotal = isGuest ? (cart?.subtotal_amount ?? 0) : (preview?.totals.subtotal_amount ?? 0);
+    const discount = isGuest ? (cart?.discount_amount ?? 0) : (preview?.totals.discount_amount ?? 0);
+    const tax      = isGuest ? (cart?.tax_amount ?? 0) : (preview?.totals.tax_amount ?? 0);
+    const shipping = isGuest ? (selectedMethod.shipping_amount ?? 0) : (preview?.totals.shipping_amount ?? 0);
+    const total    = subtotal + shipping - discount + tax;
+
+    if (!reviewAddress) return null;
+
     return (
       <div className="flex flex-col gap-6">
         <StepHeader step={3} label="Review your order" onBack={() => setStep('shipping')} />
 
         {/* Address summary */}
         <Section title="Delivering to">
-          <p className="text-foreground text-sm font-medium">{address.name}</p>
-          <p className="text-muted-foreground text-sm">{address.address_line_1}</p>
+          <p className="text-foreground text-sm font-medium">{reviewAddress.name}</p>
+          <p className="text-muted-foreground text-sm">{reviewAddress.address_line_1}</p>
           <p className="text-muted-foreground text-sm">
-            {[address.district, address.city, address.region].filter(Boolean).join(', ')}
+            {[reviewAddress.district, reviewAddress.city, reviewAddress.region].filter(Boolean).join(', ')}
           </p>
         </Section>
 
         {/* Shipping summary */}
         <Section title="Shipping">
-          <p className="text-foreground text-sm">{shipping_method.name}</p>
+          <p className="text-foreground text-sm">{selectedMethod.name}</p>
           <p className="text-muted-foreground text-sm">
-            {shipping_method.min_delivery_days}–{shipping_method.max_delivery_days} business days
+            {selectedMethod.min_delivery_days}–{selectedMethod.max_delivery_days} business days
           </p>
         </Section>
 
         {/* Totals */}
         <Section title="Order total">
           <div className="flex flex-col gap-2 text-sm">
-            <Row label="Subtotal" value={formatMoney(totals.subtotal_amount)} />
-            {totals.discount_amount > 0 && (
-              <Row label="Discount" value={`-${formatMoney(totals.discount_amount)}`} className="text-green-600" />
+            <Row label="Subtotal" value={formatMoney(subtotal)} />
+            {discount > 0 && (
+              <Row label="Discount" value={`-${formatMoney(discount)}`} className="text-green-600" />
             )}
-            {totals.tax_amount > 0 && (
-              <Row label="Tax" value={formatMoney(totals.tax_amount)} />
+            {tax > 0 && (
+              <Row label="Tax" value={formatMoney(tax)} />
             )}
-            <Row label="Shipping" value={formatMoney(totals.shipping_amount)} />
+            <Row label="Shipping" value={formatMoney(shipping)} />
             <Separator />
-            <Row label="Total" value={formatMoney(totals.total_amount)} bold />
+            <Row label="Total" value={formatMoney(total)} bold />
           </div>
         </Section>
 
@@ -298,7 +404,7 @@ export default function CheckoutFlow() {
         {error && <p className="bg-destructive/10 text-destructive rounded-lg px-3.5 py-2.5 text-sm">{error}</p>}
 
         <Button type="button" size="lg" onClick={handlePlaceOrder} className="w-full">
-          Place order & pay {formatMoney(totals.total_amount)}
+          Place order & pay {formatMoney(total)}
         </Button>
 
         <p className="text-muted-foreground text-center text-xs">

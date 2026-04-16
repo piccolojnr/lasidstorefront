@@ -1,7 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { ROUTES } from '../lib/constants';
 
-const PROTECTED_PREFIXES = ['/account', '/checkout'];
+const PROTECTED_PREFIXES = ['/account'];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
@@ -11,7 +11,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   );
 
   if (!isProtected) return next();
-
   // Check session cookie presence server-side.
   // Full session validation happens in the page's frontmatter via the API.
   // Here we do a lightweight cookie presence check to avoid the round-trip

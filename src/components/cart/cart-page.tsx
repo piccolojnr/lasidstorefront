@@ -53,9 +53,7 @@ export default function CartPage() {
     finally { setLoadingItemId(null); }
   }
 
-  const checkoutHref = session.authenticated
-    ? ROUTES.checkout
-    : `${ROUTES.authLogin}?redirect=${ROUTES.checkout}`;
+  const checkoutHref = ROUTES.checkout;
 
   return (
     <div className="grid gap-10 lg:grid-cols-3 lg:items-start">
