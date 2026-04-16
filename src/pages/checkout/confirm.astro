@@ -7,41 +7,86 @@ import type { Order } from '../../api/checkout';
 const cookieHeader = Astro.request.headers.get('cookie') ?? '';
 const api = createServerClient(cookieHeader);
 
-let order: Order | null = null;
+// Paystack sends either ?reference= or ?trxref= (both contain the same value)
+const reference =
+  Astro.url.searchParams.get('reference') ??
+  Astro.url.searchParams.get('trxref') ??
+  null;
 
-try {
-  const { data } = await api.paginated<Order>('/orders');
-  order = data[0] ?? null;
-} catch (err) {
-  if (err instanceof ApiError && err.status === 401) {
-    return Astro.redirect('/auth/login');
+let order: Order | null = null;
+let paymentStatus: string | null = null;
+let verifyError: string | null = null;
+
+if (reference) {
+  try {
+    const result = await api.get<{ payment_status: string; order: Order }>(
+      `/payments/verify?reference=${encodeURIComponent(reference)}`,
+    );
+    paymentStatus = result.payment_status;
+    order = result.order;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 401) {
+      return Astro.redirect(`/auth/login?redirect=/checkout/confirm?reference=${encodeURIComponent(reference)}`);
+    }
+    verifyError = err instanceof ApiError ? err.message : 'Could not verify payment.';
   }
+} else {
+  // No reference in URL — redirect home (direct navigation)
+  return Astro.redirect('/');
 }
+
+const isPaid = paymentStatus === 'paid' || paymentStatus === 'success';
 ---
 
 <Layout title="Order confirmed">
   <div class="mx-auto max-w-lg px-4 py-16 sm:px-6">
     <div class="flex flex-col items-center gap-6 text-center">
 
-      <!-- Success icon -->
-      <div class="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-        </svg>
-      </div>
-
-      <div>
-        <h1 class="font-heading text-2xl font-bold text-foreground">Order confirmed!</h1>
-        {order ? (
+      {verifyError ? (
+        <!-- Verification error state -->
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-heading text-2xl font-bold text-foreground">Could not confirm payment</h1>
+          <p class="mt-2 text-sm text-muted-foreground">{verifyError}</p>
+          <p class="mt-1 text-sm text-muted-foreground">If you completed payment, it will be confirmed shortly. Check your email for updates.</p>
+        </div>
+      ) : !isPaid ? (
+        <!-- Payment pending state -->
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-heading text-2xl font-bold text-foreground">Payment pending</h1>
           <p class="mt-2 text-sm text-muted-foreground">
-            Order <span class="font-medium text-foreground">{order.order_number}</span> is being processed.
+            Your payment is being processed. We'll send a confirmation email once it clears.
           </p>
-        ) : (
-          <p class="mt-2 text-sm text-muted-foreground">Your payment was received and your order is being processed.</p>
-        )}
-      </div>
+        </div>
+      ) : (
+        <!-- Success state -->
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-heading text-2xl font-bold text-foreground">Order confirmed!</h1>
+          {order ? (
+            <p class="mt-2 text-sm text-muted-foreground">
+              Order <span class="font-medium text-foreground">{order.order_number}</span> is being processed.
+            </p>
+          ) : (
+            <p class="mt-2 text-sm text-muted-foreground">Your payment was received and your order is being processed.</p>
+          )}
+        </div>
+      )}
 
-      {order && (
+      {order && isPaid && (
         <div class="w-full rounded-xl border border-border p-5 text-left">
           <p class="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Summary</p>
           <div class="flex flex-col gap-2 text-sm">
@@ -69,7 +114,7 @@ try {
       )}
 
       <div class="flex gap-3">
-        {order && (
+        {order && isPaid && (
           <a
             href={`/account/orders/${order.id}`}
             class="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
