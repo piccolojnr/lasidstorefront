@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { addressesApi, type Address, type AddressPayload } from '../../api/addresses';
-import { ApiError } from '../../api/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { addressesApi, type Address, type AddressPayload } from '@/api/addresses';
+import { ApiError } from '@/api/client';
 
 interface Props {
   initial?: Partial<Address>;
@@ -56,26 +59,34 @@ export default function AddressForm({ initial, onSaved, onCancel }: Props) {
     }
   }
 
-  function field(id: keyof AddressPayload, label: string, required = false, type = 'text') {
+  function Field({
+    id,
+    label,
+    required = false,
+    type = 'text',
+  }: {
+    id: keyof AddressPayload;
+    label: string;
+    required?: boolean;
+    type?: string;
+  }) {
     const val = form[id] as string;
     const err = fieldErrors[id]?.[0];
     return (
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={id} className="text-sm font-medium text-gray-700">
-          {label}{required && <span className="ml-0.5 text-red-500">*</span>}
-        </label>
-        <input
+        <Label htmlFor={id}>
+          {label}
+          {required && <span className="text-destructive ml-0.5">*</span>}
+        </Label>
+        <Input
           id={id}
           type={type}
           value={val}
           onChange={(e) => set(id, e.target.value)}
           required={required}
-          className={[
-            'rounded-xl border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900',
-            err ? 'border-red-400' : 'border-gray-200',
-          ].join(' ')}
+          aria-invalid={!!err}
         />
-        {err && <p className="text-xs text-red-500">{err}</p>}
+        {err && <p className="text-destructive text-xs">{err}</p>}
       </div>
     );
   }
@@ -83,56 +94,48 @@ export default function AddressForm({ initial, onSaved, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4">
-        {field('name', 'Full name', true)}
-        {field('phone', 'Phone')}
+        <Field id="name" label="Full name" required />
+        <Field id="phone" label="Phone" />
       </div>
-      {field('address_line_1', 'Address line 1', true)}
-      {field('address_line_2', 'Address line 2')}
+      <Field id="address_line_1" label="Address line 1" required />
+      <Field id="address_line_2" label="Address line 2" />
       <div className="grid grid-cols-2 gap-4">
-        {field('city', 'City', true)}
-        {field('district', 'District')}
+        <Field id="city" label="City" required />
+        <Field id="district" label="District" />
       </div>
       <div className="grid grid-cols-2 gap-4">
-        {field('region', 'Region')}
-        {field('postal_code', 'Postal code')}
+        <Field id="region" label="Region" />
+        <Field id="postal_code" label="Postal code" />
       </div>
-      {field('landmark', 'Landmark (optional)')}
+      <Field id="landmark" label="Landmark (optional)" />
 
-      <label className="flex items-center gap-2 text-sm text-gray-700">
+      <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
           checked={form.is_default}
           onChange={(e) => set('is_default', e.target.checked)}
-          className="rounded border-gray-300"
+          className="border-input rounded"
         />
         Set as default address
       </label>
 
       {status === 'error' && errorMsg && (
-        <p className="rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-600">{errorMsg}</p>
+        <p className="bg-destructive/10 text-destructive rounded-lg px-3.5 py-2.5 text-sm">{errorMsg}</p>
       )}
 
       <div className="flex gap-3 pt-2">
-        <button
-          type="submit"
-          disabled={status === 'loading'}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-900 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={status === 'loading'} size="lg" className="flex-1">
           {status === 'loading' && (
-            <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
             </svg>
           )}
           {isEdit ? 'Save changes' : 'Add address'}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 transition hover:border-gray-400"
-        >
+        </Button>
+        <Button type="button" variant="outline" size="lg" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );
