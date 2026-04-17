@@ -218,6 +218,8 @@ Query parameters:
 - `search` optional
 - `category` optional
 - `brand` optional
+- `tag` optional
+- `collection` optional
 - `featured` optional
 - `sort` optional, defaults to `latest`
 
@@ -242,6 +244,16 @@ Example response:
       "base_price": 250000,
       "compare_at_price": 300000,
       "is_featured": true,
+      "badges": [
+        {
+          "key": "new_arrival",
+          "label": "New arrival"
+        },
+        {
+          "key": "on_sale",
+          "label": "On sale"
+        }
+      ],
       "primary_image_url": "https://cdn.example.test/products/sp-001.jpg",
       "category": {
         "id": 1,
@@ -252,6 +264,20 @@ Example response:
         "id": 3,
         "name": "Acme",
         "slug": "acme"
+      },
+      "tags": [
+        {
+          "id": 8,
+          "name": "Editor Pick",
+          "slug": "editor-pick"
+        }
+      ],
+      "collections": [
+        {
+          "id": 4,
+          "name": "Top Picks",
+          "slug": "top-picks"
+        }
       }
     }
   ],
@@ -289,6 +315,16 @@ Example response:
     "base_price": 250000,
     "compare_at_price": 300000,
     "is_featured": true,
+    "badges": [
+      {
+        "key": "new_arrival",
+        "label": "New arrival"
+      },
+      {
+        "key": "on_sale",
+        "label": "On sale"
+      }
+    ],
     "track_inventory": true,
     "allow_backorders": false,
     "published_at": "2026-04-01T08:00:00.000000Z",
@@ -311,6 +347,23 @@ Example response:
       "slug": "acme",
       "image_url": "https://cdn.example.test/brands/acme.jpg"
     },
+    "tags": [
+      {
+        "id": 8,
+        "name": "Editor Pick",
+        "slug": "editor-pick",
+        "description": "Manual highlights for strong merchandising placements."
+      }
+    ],
+    "collections": [
+      {
+        "id": 4,
+        "name": "Top Picks",
+        "slug": "top-picks",
+        "description": "Manual highlights spanning the strongest seeded products.",
+        "sort_order": 10
+      }
+    ],
     "variants": [
       {
         "id": 44,
@@ -322,6 +375,125 @@ Example response:
       }
     ],
     "related_products": []
+  },
+  "errors": null
+}
+```
+
+Computed badge behavior:
+
+- `new_arrival` is derived from `published_at` and the backend-configured new-arrival window
+- `on_sale` is derived from `compare_at_price > base_price`
+
+#### `GET /api/v1/catalog/tags`
+
+Returns active storefront tags ordered by name.
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": null,
+  "data": [
+    {
+      "id": 8,
+      "name": "Editor Pick",
+      "slug": "editor-pick",
+      "description": "Manual highlights for strong merchandising placements.",
+      "products_count": 6
+    }
+  ],
+  "errors": null
+}
+```
+
+#### `GET /api/v1/catalog/tags/{slug}`
+
+Returns one active tag plus paginated products assigned to it.
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": null,
+  "data": {
+    "tag": {
+      "id": 8,
+      "name": "Editor Pick",
+      "slug": "editor-pick",
+      "description": "Manual highlights for strong merchandising placements.",
+      "products_count": 6
+    },
+    "products": [],
+    "products_meta": {
+      "current_page": 1,
+      "from": null,
+      "last_page": 1,
+      "path": "https://example.test/api/v1/catalog/tags/editor-pick",
+      "per_page": 20,
+      "to": null,
+      "total": 0
+    }
+  },
+  "errors": null
+}
+```
+
+#### `GET /api/v1/catalog/collections`
+
+Returns active curated collections ordered by `sort_order`, then name.
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": null,
+  "data": [
+    {
+      "id": 4,
+      "name": "Top Picks",
+      "slug": "top-picks",
+      "description": "Manual highlights spanning the strongest seeded products.",
+      "sort_order": 50,
+      "products_count": 6
+    }
+  ],
+  "errors": null
+}
+```
+
+#### `GET /api/v1/catalog/collections/{slug}`
+
+Returns one active collection plus paginated products assigned to it.
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": null,
+  "data": {
+    "collection": {
+      "id": 4,
+      "name": "Top Picks",
+      "slug": "top-picks",
+      "description": "Manual highlights spanning the strongest seeded products.",
+      "sort_order": 50,
+      "products_count": 6
+    },
+    "products": [],
+    "products_meta": {
+      "current_page": 1,
+      "from": null,
+      "last_page": 1,
+      "path": "https://example.test/api/v1/catalog/collections/top-picks",
+      "per_page": 20,
+      "to": null,
+      "total": 0
+    }
   },
   "errors": null
 }

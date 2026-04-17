@@ -5,6 +5,7 @@ export const CART_TOKEN_KEY = 'cart_token';
 export const ROUTES = {
   home: '/',
   products: '/products',
+  collections: '/collections',
   cart: '/cart',
   checkout: '/checkout',
   authLogin: '/auth/login',

@@ -1,4 +1,4 @@
-import { apiClient, type PaginatedResult } from './client';
+import { apiClient, type PaginatedResult, type PaginationMeta } from './client';
 
 export interface Category {
   id: number;
@@ -13,6 +13,40 @@ export interface Brand {
   name: string;
   slug: string;
   image_url?: string;
+}
+
+export interface Badge {
+  key: 'new_arrival' | 'on_sale' | string;
+  label: string;
+}
+
+export interface TagSummary {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  products_count: number;
+}
+
+export interface TagDetail {
+  tag: TagSummary;
+  products: ProductSummary[];
+  products_meta: PaginationMeta;
+}
+
+export interface CollectionSummary {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  sort_order: number;
+  products_count: number;
+}
+
+export interface CollectionDetail {
+  collection: CollectionSummary;
+  products: ProductSummary[];
+  products_meta: PaginationMeta;
 }
 
 export interface ProductImage {
@@ -38,9 +72,12 @@ export interface ProductSummary {
   base_price: number;
   compare_at_price: number | null;
   is_featured: boolean;
+  badges: Badge[];
   primary_image_url: string | null;
   category: Pick<Category, 'id' | 'name' | 'slug'> | null;
   brand: Pick<Brand, 'id' | 'name' | 'slug'> | null;
+  tags: TagSummary[];
+  collections: CollectionSummary[];
 }
 
 export interface ProductDetail extends ProductSummary {
@@ -61,10 +98,11 @@ export interface ProductsQuery {
   search?: string;
   category?: string;
   brand?: string;
+  tag?: string;
+  collection?: string;
   featured?: boolean | 1 | 0;
   sort?: 'latest' | 'price_asc' | 'price_desc';
   page?: number;
-  // Price range in pesewas (minor units). Needs backend support on /catalog/products.
   min_price?: number;
   max_price?: number;
 }
@@ -102,8 +140,25 @@ export const catalogApi = {
     return apiClient.get<ProductDetail>(`/catalog/products/${slug}`);
   },
 
-  // Needs a GET /catalog/brands endpoint on the backend.
   getBrands(): Promise<BrandSummary[]> {
     return apiClient.get<BrandSummary[]>('/catalog/brands');
+  },
+
+  getTags(): Promise<TagSummary[]> {
+    return apiClient.get<TagSummary[]>('/catalog/tags');
+  },
+
+  getTag(slug: string, page?: number): Promise<TagDetail> {
+    const qs = page && page > 1 ? `?page=${page}` : '';
+    return apiClient.get<TagDetail>(`/catalog/tags/${slug}${qs}`);
+  },
+
+  getCollections(): Promise<CollectionSummary[]> {
+    return apiClient.get<CollectionSummary[]>('/catalog/collections');
+  },
+
+  getCollection(slug: string, page?: number): Promise<CollectionDetail> {
+    const qs = page && page > 1 ? `?page=${page}` : '';
+    return apiClient.get<CollectionDetail>(`/catalog/collections/${slug}${qs}`);
   },
 };
