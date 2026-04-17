@@ -1,4 +1,12 @@
-export const API_BASE = import.meta.env.PUBLIC_API_BASE ?? '/api/v1';
+const publicApiBase = import.meta.env.PUBLIC_API_BASE?.trim() || '/api/v1';
+const serverApiBase = import.meta.env.API_BASE?.trim();
+
+export const API_BASE = publicApiBase;
+
+export const SERVER_API_BASE =
+  serverApiBase || (publicApiBase.startsWith('http://') || publicApiBase.startsWith('https://')
+    ? publicApiBase
+    : '');
 
 export const CART_TOKEN_KEY = 'cart_token';
 

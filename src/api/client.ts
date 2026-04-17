@@ -1,4 +1,4 @@
-import { API_BASE } from '../lib/constants';
+import { API_BASE, SERVER_API_BASE } from '../lib/constants';
 import { getCsrfToken, getCsrfHeaderName } from '../lib/csrf';
 import { cartToken } from '../stores/cart-store';
 
@@ -42,6 +42,20 @@ export class ApiError extends Error {
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+function getRequestBase() {
+  if (!import.meta.env.SSR) {
+    return API_BASE;
+  }
+
+  if (SERVER_API_BASE) {
+    return SERVER_API_BASE;
+  }
+
+  throw new Error(
+    'Server-side API requests require `API_BASE` to be set to an absolute URL when `PUBLIC_API_BASE` is relative.',
+  );
+}
+
 async function request<T>(
   method: HttpMethod,
   path: string,
@@ -61,7 +75,9 @@ async function request<T>(
     ...extraHeaders,
   };
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const requestBase = getRequestBase();
+
+  const res = await fetch(`${requestBase}${path}`, {
     method,
     credentials: 'include',
     headers,
@@ -110,7 +126,9 @@ export const apiClient = {
       ...headers,
     };
 
-    const res = await fetch(`${API_BASE}${path}`, {
+    const requestBase = getRequestBase();
+
+    const res = await fetch(`${requestBase}${path}`, {
       method: 'GET',
       credentials: 'include',
       headers: reqHeaders,
@@ -138,7 +156,13 @@ export const apiClient = {
  */
 export function createServerClient(cookieHeader: string) {
   async function serverRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
-    const res = await fetch(`${API_BASE}${path}`, {
+    if (!SERVER_API_BASE) {
+      throw new Error(
+        'createServerClient requires `API_BASE` to be set to an absolute URL when `PUBLIC_API_BASE` is relative.',
+      );
+    }
+
+    const res = await fetch(`${SERVER_API_BASE}${path}`, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -163,7 +187,13 @@ export function createServerClient(cookieHeader: string) {
   }
 
   async function serverPaginated<T>(path: string): Promise<PaginatedResult<T>> {
-    const res = await fetch(`${API_BASE}${path}`, {
+    if (!SERVER_API_BASE) {
+      throw new Error(
+        'createServerClient requires `API_BASE` to be set to an absolute URL when `PUBLIC_API_BASE` is relative.',
+      );
+    }
+
+    const res = await fetch(`${SERVER_API_BASE}${path}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
