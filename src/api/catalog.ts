@@ -64,6 +64,15 @@ export interface ProductsQuery {
   featured?: boolean | 1 | 0;
   sort?: 'latest' | 'price_asc' | 'price_desc';
   page?: number;
+  // Price range in pesewas (minor units). Needs backend support on /catalog/products.
+  min_price?: number;
+  max_price?: number;
+}
+
+export interface BrandSummary {
+  id: number;
+  name: string;
+  slug: string;
 }
 
 function buildQuery(params: Record<string, unknown>): string {
@@ -91,5 +100,10 @@ export const catalogApi = {
 
   getProduct(slug: string): Promise<ProductDetail> {
     return apiClient.get<ProductDetail>(`/catalog/products/${slug}`);
+  },
+
+  // Needs a GET /catalog/brands endpoint on the backend.
+  getBrands(): Promise<BrandSummary[]> {
+    return apiClient.get<BrandSummary[]>('/catalog/brands');
   },
 };
