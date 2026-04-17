@@ -2,12 +2,12 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
-import vercel from '@astrojs/vercel';
+import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
-  adapter: vercel(),
+  adapter: node({ mode: 'standalone' }),
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
@@ -15,5 +15,6 @@ export default defineConfig({
   server: {
     host: true,
     port: 4321,
+    allowedHosts: ['storefront.lasidcommerce.test'],
   },
 });
