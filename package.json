@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "astro": "astro"
   },
+  "packageManager": "pnpm@10.26.2",
   "dependencies": {
     "@astrojs/react": "^5.0.3",
     "@astrojs/vercel": "^10.0.4",
