@@ -52,6 +52,9 @@ export interface CollectionDetail {
 export interface ProductImage {
   id: number;
   url: string;
+  thumb_url: string;
+  card_url: string;
+  gallery_url: string;
   is_primary: boolean;
 }
 
@@ -74,6 +77,9 @@ export interface ProductSummary {
   is_featured: boolean;
   badges: Badge[];
   primary_image_url: string | null;
+  primary_image_thumb_url: string | null;
+  primary_image_card_url: string | null;
+  primary_image_gallery_url: string | null;
   category: Pick<Category, 'id' | 'name' | 'slug'> | null;
   brand: Pick<Brand, 'id' | 'name' | 'slug'> | null;
   tags: TagSummary[];

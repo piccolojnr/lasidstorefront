@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/layout.astro';
 import AddToCart from '../../components/cart/add-to-cart';
-import { catalogApi } from '../../api/catalog';
+import { catalogApi, type ProductSummary } from '../../api/catalog';
 import { formatMoney } from '../../lib/money';
 
 const { slug } = Astro.params;
@@ -16,6 +16,7 @@ try {
 }
 
 const primaryImage = product.images.find((img) => img.is_primary) ?? product.images[0];
+const primaryImageSrc = primaryImage?.gallery_url ?? primaryImage?.url;
 
 const hasDiscount =
   product.compare_at_price !== null &&
@@ -29,6 +30,10 @@ const badges = product.badges ?? [];
 const isNewArrival = badges.some((b) => b.key === 'new_arrival');
 const tags = product.tags ?? [];
 const collections = product.collections ?? [];
+
+function getSummaryCardImage(productSummary: ProductSummary): string | null {
+  return productSummary.primary_image_card_url ?? productSummary.primary_image_url;
+}
 ---
 
 <Layout title={product.name} description={product.short_description ?? undefined}>
@@ -57,7 +62,7 @@ const collections = product.collections ?? [];
         <div class="aspect-square overflow-hidden rounded-2xl bg-muted">
           {primaryImage ? (
             <img
-              src={primaryImage.url}
+              src={primaryImageSrc}
               alt={product.name}
               class="h-full w-full object-cover"
             />
@@ -80,7 +85,12 @@ const collections = product.collections ?? [];
                   img.is_primary ? 'border-foreground' : 'border-transparent',
                 ]}
               >
-                <img src={img.url} alt="" class="h-full w-full object-cover" loading="lazy" />
+                <img
+                  src={img.thumb_url ?? img.url}
+                  alt=""
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </div>
             ))}
           </div>
@@ -205,9 +215,9 @@ const collections = product.collections ?? [];
               class="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div class="aspect-square overflow-hidden bg-muted">
-                {related.primary_image_url ? (
+                {getSummaryCardImage(related) ? (
                   <img
-                    src={related.primary_image_url}
+                    src={getSummaryCardImage(related)}
                     alt={related.name}
                     class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                     loading="lazy"

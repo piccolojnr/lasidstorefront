@@ -255,6 +255,9 @@ Example response:
         }
       ],
       "primary_image_url": "https://cdn.example.test/products/sp-001.jpg",
+      "primary_image_thumb_url": "https://cdn.example.test/products/conversions/sp-001-thumb.jpg",
+      "primary_image_card_url": "https://cdn.example.test/products/conversions/sp-001-card.jpg",
+      "primary_image_gallery_url": "https://cdn.example.test/products/conversions/sp-001-gallery.jpg",
       "category": {
         "id": 1,
         "name": "Electronics",
@@ -294,6 +297,12 @@ Example response:
 }
 ```
 
+Image behavior:
+
+- `primary_image_url` remains the original image URL for backward compatibility.
+- `primary_image_thumb_url`, `primary_image_card_url`, and `primary_image_gallery_url` expose conversion-specific URLs for storefront rendering.
+- If a queued conversion is not ready yet, the backend falls back to the original image URL for that conversion field.
+
 #### `GET /api/v1/catalog/products/{slug}`
 
 Returns a single product with related products.
@@ -332,6 +341,9 @@ Example response:
       {
         "id": 99,
         "url": "https://cdn.example.test/products/sp-001.jpg",
+        "thumb_url": "https://cdn.example.test/products/conversions/sp-001-thumb.jpg",
+        "card_url": "https://cdn.example.test/products/conversions/sp-001-card.jpg",
+        "gallery_url": "https://cdn.example.test/products/conversions/sp-001-gallery.jpg",
         "is_primary": true
       }
     ],
@@ -379,6 +391,12 @@ Example response:
   "errors": null
 }
 ```
+
+Image behavior:
+
+- `url` remains the original image URL for backward compatibility.
+- `thumb_url`, `card_url`, and `gallery_url` expose conversion-specific URLs for product galleries and cards.
+- If a queued conversion is not ready yet, the backend falls back to the original image URL for that conversion field.
 
 Computed badge behavior:
 
@@ -441,6 +459,13 @@ Example response:
 }
 ```
 
+The `products` array in this response uses the same product-list shape as `GET /api/v1/catalog/products`, including:
+
+- `primary_image_url`
+- `primary_image_thumb_url`
+- `primary_image_card_url`
+- `primary_image_gallery_url`
+
 #### `GET /api/v1/catalog/collections`
 
 Returns active curated collections ordered by `sort_order`, then name.
@@ -498,6 +523,13 @@ Example response:
   "errors": null
 }
 ```
+
+The `products` array in this response uses the same product-list shape as `GET /api/v1/catalog/products`, including:
+
+- `primary_image_url`
+- `primary_image_thumb_url`
+- `primary_image_card_url`
+- `primary_image_gallery_url`
 
 ### Guest Cart
 

@@ -18,6 +18,7 @@ const discountPct = hasDiscount
 
 const badges = product.badges ?? [];
 const isNewArrival = badges.some((b) => b.key === 'new_arrival');
+const cardImageSrc = product.primary_image_card_url ?? product.primary_image_url;
 ---
 
 <a
@@ -27,9 +28,9 @@ const isNewArrival = badges.some((b) => b.key === 'new_arrival');
   <!-- Image -->
   <div class="relative aspect-square overflow-hidden bg-muted">
     {
-      product.primary_image_url ? (
+      cardImageSrc ? (
         <img
-          src={product.primary_image_url}
+          src={cardImageSrc}
           alt={product.name}
           class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
           loading="lazy"
