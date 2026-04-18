@@ -1,28 +1,5 @@
-declare global {
-  interface Window {
-    __LASID_RUNTIME_CONFIG__?: {
-      publicApiBase?: string;
-    };
-  }
-}
-
-function getRuntimePublicApiBase() {
-  if (typeof window === 'undefined') {
-    return '';
-  }
-
-  return window.__LASID_RUNTIME_CONFIG__?.publicApiBase?.trim() ?? '';
-}
-
-const publicApiBase =
-  getRuntimePublicApiBase() || import.meta.env.PUBLIC_API_BASE?.trim() || '/api/v1';
-
-const serverApiBase =
-  (typeof process !== 'undefined' ? process.env.API_BASE?.trim() : '') ||
-  (typeof process !== 'undefined' ? process.env.PUBLIC_API_BASE?.trim() : '') ||
-  import.meta.env.API_BASE?.trim() ||
-  import.meta.env.PUBLIC_API_BASE?.trim() ||
-  '';
+const publicApiBase = import.meta.env.PUBLIC_API_BASE?.trim() || '/api/v1';
+const serverApiBase = import.meta.env.API_BASE?.trim();
 
 export const API_BASE = publicApiBase;
 

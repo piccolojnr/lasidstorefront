@@ -9,18 +9,6 @@ const [featuredResult, categoriesResult, collectionsResult] = await Promise.allS
   catalogApi.getCollections(),
 ]);
 
-const homepageFetchResults = [
-  ['featured products', featuredResult],
-  ['categories', categoriesResult],
-  ['collections', collectionsResult],
-] as const;
-
-for (const [label, result] of homepageFetchResults) {
-  if (result.status === 'rejected') {
-    console.error(`[homepage] Failed to load ${label}`, result.reason);
-  }
-}
-
 const featured = featuredResult.status === 'fulfilled' ? featuredResult.value.data : [];
 const cats = categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
 const collections = collectionsResult.status === 'fulfilled' ? collectionsResult.value : [];
