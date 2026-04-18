@@ -37,6 +37,10 @@ export interface OrderItem {
   product_name_snapshot: string;
   variant_name_snapshot: string | null;
   sku_snapshot: string;
+  primary_image_url: string | null;
+  primary_image_thumb_url: string | null;
+  primary_image_card_url: string | null;
+  primary_image_gallery_url: string | null;
   unit_price: number;
   quantity: number;
   line_total: number;

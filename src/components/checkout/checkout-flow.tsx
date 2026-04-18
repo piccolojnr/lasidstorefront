@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { cartStore } from '@/stores/cart-store';
 import { sessionStore } from '@/stores/session-store';
 import { addressesApi, type Address } from '@/api/addresses';
@@ -28,6 +30,7 @@ export default function CheckoutFlow() {
   const [selectedMethod, setSelectedMethod] = useState<ShippingMethod | null>(null);
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof checkoutApi.preview>> | null>(null);
   const [notes, setNotes] = useState('');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
@@ -38,6 +41,10 @@ export default function CheckoutFlow() {
     if (session.loading) return;
     if (session.authenticated) {
       setStep('address');
+      setIsGuest(false);
+      setGuestData(null);
+      setSelectedMethod(null);
+      setPreview(null);
       addressesApi.list().then(setAddresses).catch(() => setAddresses([]));
     }
     // unauthenticated stays at 'gate'
@@ -45,6 +52,8 @@ export default function CheckoutFlow() {
 
   async function handleAddressSelect(address: Address) {
     setSelectedAddress(address);
+    setSelectedMethod(null);
+    setPreview(null);
     setError('');
     setLoading(true);
     try {
@@ -99,6 +108,7 @@ export default function CheckoutFlow() {
           shipping_method_id: selectedMethod.id,
           payment_provider: 'paystack',
           notes: notes || undefined,
+          delivery_notes: deliveryNotes || undefined,
         });
         authorizationUrl = result.payment.authorization_url;
       } else {
@@ -108,6 +118,7 @@ export default function CheckoutFlow() {
           shipping_method_id: selectedMethod.id,
           payment_provider: 'paystack',
           notes: notes || undefined,
+          delivery_notes: deliveryNotes || undefined,
         };
         const result = await checkoutApi.initialize(payload);
         authorizationUrl = result.payment.authorization_url;
@@ -154,9 +165,12 @@ export default function CheckoutFlow() {
     methods: ShippingMethod[],
   ) {
     setIsGuest(true);
+    setSelectedAddress(null);
     setGuestData(data);
     setShippingMethods(methods);
     setSelectedMethod(methods[0] ?? null);
+    setPreview(null);
+    setError('');
     setStep('shipping');
   }
 
@@ -177,23 +191,26 @@ export default function CheckoutFlow() {
       <div className="flex flex-col gap-6">
         <StepHeader step={1} label="How would you like to continue?" />
 
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => setStep('guest-form')}
-            className="border-border hover:border-foreground/40 flex flex-col gap-1 rounded-xl border p-5 text-left transition"
-          >
-            <span className="text-foreground font-medium">Continue as guest</span>
-            <span className="text-muted-foreground text-sm">No account needed. We'll email you a link to track your order.</span>
-          </button>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ChoiceCard
+            title="Continue as guest"
+            description="Checkout quickly now. We will still email order and delivery updates."
+            actionLabel="Use guest checkout"
+            onClick={() => {
+              setError('');
+              setGuestData(null);
+              setSelectedMethod(null);
+              setPreview(null);
+              setStep('guest-form');
+            }}
+          />
 
-          <a
+          <ChoiceLinkCard
+            title="Sign in or create account"
+            description="Use saved addresses, keep order history, and make repeat checkout faster."
+            actionLabel="Go to sign in"
             href={`/auth/login?redirect=/checkout`}
-            className="border-border hover:border-foreground/40 flex flex-col gap-1 rounded-xl border p-5 text-left transition"
-          >
-            <span className="text-foreground font-medium">Sign in or create account</span>
-            <span className="text-muted-foreground text-sm">Access saved addresses and order history.</span>
-          </a>
+          />
         </div>
       </div>
     );
@@ -204,7 +221,17 @@ export default function CheckoutFlow() {
     return (
       <div className="flex flex-col gap-6">
         <StepHeader step={1} label="Your details" onBack={() => setStep('gate')} />
-        <GuestCheckoutForm onResolved={handleGuestResolved} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Contact and delivery details</CardTitle>
+            <CardDescription>
+              We use this information to resolve delivery options before payment.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GuestCheckoutForm onResolved={handleGuestResolved} />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -218,9 +245,15 @@ export default function CheckoutFlow() {
         {!showAddressForm && (
           <>
             {addresses.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No addresses saved yet. Add one below.</p>
+              <Card size="sm">
+                <CardContent className="pt-1">
+                  <p className="text-muted-foreground text-sm">
+                    No addresses saved yet. Add one below to continue.
+                  </p>
+                </CardContent>
+              </Card>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="grid gap-3">
                 {addresses.map((addr) => (
                   <button
                     key={addr.id}
@@ -228,27 +261,37 @@ export default function CheckoutFlow() {
                     onClick={() => handleAddressSelect(addr)}
                     disabled={loading}
                     className={[
-                      'border-border hover:border-foreground/40 flex flex-col gap-0.5 rounded-xl border p-4 text-left text-sm transition disabled:opacity-60',
-                      selectedAddress?.id === addr.id ? 'border-foreground bg-muted' : '',
+                      'rounded-2xl border p-4 text-left text-sm transition disabled:opacity-60',
+                      selectedAddress?.id === addr.id
+                        ? 'border-foreground bg-muted ring-1 ring-foreground/15'
+                        : 'border-border hover:border-foreground/40 hover:bg-muted/40',
                     ].join(' ')}
                   >
-                    <span className="text-foreground font-medium">{addr.name}</span>
-                    <span className="text-muted-foreground">{addr.address_line_1}</span>
-                    <span className="text-muted-foreground">
-                      {[addr.district, addr.city, addr.region].filter(Boolean).join(', ')}
-                    </span>
-                    {addr.shipping_zone && (
-                      <span className="text-muted-foreground text-xs">{addr.shipping_zone.name}</span>
-                    )}
-                    {addr.phone && <span className="text-muted-foreground">{addr.phone}</span>}
-                    {addr.is_default && (
-                      <span className="bg-muted text-muted-foreground mt-1 w-fit rounded-full px-2 py-0.5 text-xs">Default</span>
-                    )}
-                    {!addr.shipping_zone_id && (
-                      <span className="mt-1 w-fit rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
-                        No shipping zone
-                      </span>
-                    )}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-foreground font-medium">{addr.name}</span>
+                        <span className="text-muted-foreground">{addr.address_line_1}</span>
+                        <span className="text-muted-foreground">
+                          {[addr.district, addr.city, addr.region].filter(Boolean).join(', ')}
+                        </span>
+                        {addr.shipping_zone && (
+                          <span className="text-muted-foreground text-xs">{addr.shipping_zone.name}</span>
+                        )}
+                        {addr.phone && <span className="text-muted-foreground">{addr.phone}</span>}
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        {addr.is_default && (
+                          <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs">
+                            Default
+                          </span>
+                        )}
+                        {!addr.shipping_zone_id && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+                            No zone
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -264,10 +307,20 @@ export default function CheckoutFlow() {
         )}
 
         {showAddressForm && (
-          <AddressForm
-            onSaved={handleAddressSaved}
-            onCancel={() => setShowAddressForm(false)}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Add a delivery address</CardTitle>
+              <CardDescription>
+                Save an address with enough detail for shipping zone resolution and drop-off instructions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AddressForm
+                onSaved={handleAddressSaved}
+                onCancel={() => setShowAddressForm(false)}
+              />
+            </CardContent>
+          </Card>
         )}
 
         {loading && <p className="text-muted-foreground text-sm">Loading shipping options…</p>}
@@ -294,8 +347,10 @@ export default function CheckoutFlow() {
                 type="button"
                 onClick={() => setSelectedMethod(method)}
                 className={[
-                  'border-border hover:border-foreground/40 flex items-start justify-between rounded-xl border p-4 text-left text-sm transition',
-                  selectedMethod?.id === method.id ? 'border-foreground bg-muted' : '',
+                  'flex items-start justify-between rounded-2xl border p-4 text-left text-sm transition',
+                  selectedMethod?.id === method.id
+                    ? 'border-foreground bg-muted ring-1 ring-foreground/15'
+                    : 'border-border hover:border-foreground/40 hover:bg-muted/40',
                 ].join(' ')}
               >
                 <div>
@@ -303,6 +358,11 @@ export default function CheckoutFlow() {
                   <p className="text-muted-foreground">
                     {method.min_delivery_days}–{method.max_delivery_days} business days
                   </p>
+                  {typeof method.shipping_amount === 'number' && (
+                    <p className="text-foreground mt-2 font-medium">
+                      {formatMoney(method.shipping_amount)}
+                    </p>
+                  )}
                 </div>
                 <div className={[
                   'border-border mt-0.5 h-4 w-4 flex-shrink-0 rounded-full border-2',
@@ -353,52 +413,68 @@ export default function CheckoutFlow() {
       <div className="flex flex-col gap-6">
         <StepHeader step={3} label="Review your order" onBack={() => setStep('shipping')} />
 
-        {/* Address summary */}
-        <Section title="Delivering to">
-          <p className="text-foreground text-sm font-medium">{reviewAddress.name}</p>
-          <p className="text-muted-foreground text-sm">{reviewAddress.address_line_1}</p>
-          <p className="text-muted-foreground text-sm">
-            {[reviewAddress.district, reviewAddress.city, reviewAddress.region].filter(Boolean).join(', ')}
-          </p>
-        </Section>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
+          <div className="flex flex-col gap-6">
+            <Section title="Delivering to">
+              <p className="text-foreground text-sm font-medium">{reviewAddress.name}</p>
+              <p className="text-muted-foreground text-sm">{reviewAddress.address_line_1}</p>
+              <p className="text-muted-foreground text-sm">
+                {[reviewAddress.district, reviewAddress.city, reviewAddress.region].filter(Boolean).join(', ')}
+              </p>
+            </Section>
 
-        {/* Shipping summary */}
-        <Section title="Shipping">
-          <p className="text-foreground text-sm">{selectedMethod.name}</p>
-          <p className="text-muted-foreground text-sm">
-            {selectedMethod.min_delivery_days}–{selectedMethod.max_delivery_days} business days
-          </p>
-        </Section>
+            <Section title="Shipping">
+              <p className="text-foreground text-sm">{selectedMethod.name}</p>
+              <p className="text-muted-foreground text-sm">
+                {selectedMethod.min_delivery_days}–{selectedMethod.max_delivery_days} business days
+              </p>
+            </Section>
 
-        {/* Totals */}
-        <Section title="Order total">
-          <div className="flex flex-col gap-2 text-sm">
-            <Row label="Subtotal" value={formatMoney(subtotal)} />
-            {discount > 0 && (
-              <Row label="Discount" value={`-${formatMoney(discount)}`} className="text-green-600" />
-            )}
-            {tax > 0 && (
-              <Row label="Tax" value={formatMoney(tax)} />
-            )}
-            <Row label="Shipping" value={formatMoney(shipping)} />
-            <Separator />
-            <Row label="Total" value={formatMoney(total)} bold />
+            <Section title="Order instructions">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="notes">
+                    Order notes <span className="text-muted-foreground font-normal">(optional)</span>
+                  </Label>
+                  <Textarea
+                    id="notes"
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    placeholder="Anything the store should know before fulfillment?"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="delivery-notes">
+                    Delivery notes <span className="text-muted-foreground font-normal">(optional)</span>
+                  </Label>
+                  <Textarea
+                    id="delivery-notes"
+                    value={deliveryNotes}
+                    onChange={(event) => setDeliveryNotes(event.target.value)}
+                    placeholder="Gate code, landmark, or handoff instructions for delivery."
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </Section>
           </div>
-        </Section>
 
-        {/* Notes */}
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="notes">
-            Order notes{' '}
-            <span className="text-muted-foreground font-normal">(optional)</span>
-          </Label>
-          <Textarea
-            id="notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="e.g. Leave at reception"
-            rows={2}
-          />
+          <Section title="Order total">
+            <div className="flex flex-col gap-2 text-sm">
+              <Row label="Subtotal" value={formatMoney(subtotal)} />
+              {discount > 0 && (
+                <Row label="Discount" value={`-${formatMoney(discount)}`} className="text-green-600" />
+              )}
+              {tax > 0 && (
+                <Row label="Tax" value={formatMoney(tax)} />
+              )}
+              <Row label="Shipping" value={formatMoney(shipping)} />
+              <Separator />
+              <Row label="Total" value={formatMoney(total)} bold />
+            </div>
+          </Section>
         </div>
 
         {error && <p className="bg-destructive/10 text-destructive rounded-lg px-3.5 py-2.5 text-sm">{error}</p>}
@@ -448,8 +524,8 @@ function StepHeader({ step, label, onBack }: { step: number; label: string; onBa
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border p-4">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{title}</p>
+    <div className="rounded-2xl border border-border/80 bg-card/70 p-4 shadow-sm sm:p-5">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{title}</p>
       {children}
     </div>
   );
@@ -471,5 +547,66 @@ function Row({
       <span>{label}</span>
       <span>{value}</span>
     </div>
+  );
+}
+
+function ChoiceCard({
+  title,
+  description,
+  actionLabel,
+  onClick,
+}: {
+  title: string;
+  description: string;
+  actionLabel: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-2xl border border-border bg-card p-5 text-left transition',
+        'hover:border-foreground/40 hover:bg-muted/30 hover:shadow-sm',
+      )}
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-foreground font-medium">{title}</span>
+          <span className="text-muted-foreground text-sm">{description}</span>
+        </div>
+        <span className="text-primary text-sm font-medium">{actionLabel} →</span>
+      </div>
+    </button>
+  );
+}
+
+function ChoiceLinkCard({
+  title,
+  description,
+  actionLabel,
+  href,
+}: {
+  title: string;
+  description: string;
+  actionLabel: string;
+  href: string;
+}) {
+  return (
+    <a
+      href={href}
+      className={cn(
+        'rounded-2xl border border-border bg-card p-5 text-left transition',
+        'hover:border-foreground/40 hover:bg-muted/30 hover:shadow-sm',
+      )}
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-foreground font-medium">{title}</span>
+          <span className="text-muted-foreground text-sm">{description}</span>
+        </div>
+        <span className="text-primary text-sm font-medium">{actionLabel} →</span>
+      </div>
+    </a>
   );
 }

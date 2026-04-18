@@ -61,18 +61,27 @@ export default function CartPage() {
       <div className="flex flex-col divide-y lg:col-span-2">
         {cart.items.map((item) => {
           const isUpdating = loadingItemId === item.id;
+          const itemImageSrc = item.primary_image_thumb_url ?? item.primary_image_url;
           return (
             <div
               key={item.id}
               className={['flex gap-4 py-5 transition-opacity', isUpdating ? 'pointer-events-none opacity-50' : ''].join(' ')}
             >
-              {/* Image placeholder */}
               <div className="bg-muted h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg">
-                <div className="text-muted-foreground/30 flex h-full items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                  </svg>
-                </div>
+                {itemImageSrc ? (
+                  <img
+                    src={itemImageSrc}
+                    alt={item.product_name_snapshot}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="text-muted-foreground/30 flex h-full items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-1 flex-col gap-1">

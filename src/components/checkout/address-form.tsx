@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import { addressesApi, type Address, type AddressPayload, type ShippingZoneSummary } from '@/api/addresses';
 import { ApiError } from '@/api/client';
+import AddressFields, { type AddressFieldsValue } from './address-fields';
 
 interface Props {
   initial?: Partial<Address>;
@@ -29,8 +27,26 @@ const EMPTY: AddressPayload = {
   shipping_zone_area_id: null,
 };
 
+type AddressFormState = AddressFieldsValue & {
+  type: 'shipping' | 'billing';
+  is_default: boolean;
+};
+
+function toFormState(initial?: Partial<Address>): AddressFormState {
+  return {
+    ...EMPTY,
+    ...initial,
+    phone: initial?.phone ?? '',
+    region: initial?.region ?? '',
+    district: initial?.district ?? '',
+    address_line_2: initial?.address_line_2 ?? '',
+    landmark: initial?.landmark ?? '',
+    postal_code: initial?.postal_code ?? '',
+  };
+}
+
 export default function AddressForm({ initial, onSaved, onCancel }: Props) {
-  const [form, setForm] = useState<AddressPayload>({ ...EMPTY, ...initial });
+  const [form, setForm] = useState<AddressFormState>(toFormState(initial));
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [errorMsg, setErrorMsg] = useState('');
@@ -39,163 +55,81 @@ export default function AddressForm({ initial, onSaved, onCancel }: Props) {
   const isEdit = !!initial?.id;
 
   useEffect(() => {
+    setForm(toFormState(initial));
+    setFieldErrors({});
+    setErrorMsg('');
+    setStatus('idle');
+  }, [initial]);
+
+  useEffect(() => {
     addressesApi.listZones().then(setZones).catch(() => setZones([]));
   }, []);
 
-  function set(key: keyof AddressPayload, value: string | boolean) {
-    setForm((f) => ({ ...f, [key]: value }));
+  function setField<K extends keyof AddressFieldsValue>(
+    key: K,
+    value: AddressFieldsValue[K],
+  ) {
+    setForm((current) => ({ ...current, [key]: value }));
+    setFieldErrors((current) => {
+      if (!current[key]) return current;
+      return { ...current, [key]: [] };
+    });
   }
 
-  async function handleSubmit(e: { preventDefault(): void }) {
-    e.preventDefault();
+  async function handleSubmit(event: { preventDefault(): void }) {
+    event.preventDefault();
     setStatus('loading');
     setFieldErrors({});
     setErrorMsg('');
+
     try {
+      const payload: AddressPayload = {
+        ...form,
+        phone: form.phone || null,
+        region: form.region || null,
+        district: form.district || null,
+        address_line_2: form.address_line_2 || null,
+        landmark: form.landmark || null,
+        postal_code: form.postal_code || null,
+      };
       const saved = isEdit
-        ? await addressesApi.update(initial!.id!, form)
-        : await addressesApi.create(form);
+        ? await addressesApi.update(initial!.id!, payload)
+        : await addressesApi.create(payload);
       onSaved(saved);
-    } catch (err) {
+    } catch (error) {
       setStatus('error');
-      if (err instanceof ApiError) {
-        setFieldErrors(err.errors ?? {});
-        setErrorMsg(err.message);
+      if (error instanceof ApiError) {
+        setFieldErrors(error.errors ?? {});
+        setErrorMsg(error.message);
       } else {
         setErrorMsg('Could not save address. Please try again.');
       }
     }
   }
 
-  function Field({
-    id,
-    label,
-    required = false,
-    type = 'text',
-  }: {
-    id: keyof AddressPayload;
-    label: string;
-    required?: boolean;
-    type?: string;
-  }) {
-    const val = form[id] as string;
-    const err = fieldErrors[id]?.[0];
-    return (
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={id}>
-          {label}
-          {required && <span className="text-destructive ml-0.5">*</span>}
-        </Label>
-        <Input
-          id={id}
-          type={type}
-          value={val}
-          onChange={(e) => set(id, e.target.value)}
-          required={required}
-          aria-invalid={!!err}
-        />
-        {err && <p className="text-destructive text-xs">{err}</p>}
-      </div>
-    );
-  }
-
-  const selectedZone = zones.find((z) => z.id === form.shipping_zone_id) ?? null;
-  const areaOptions = selectedZone?.areas ?? [];
-
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4">
-        <Field id="name" label="Full name" required />
-        <Field id="phone" label="Phone" />
-      </div>
-
-      {/* Zone */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="shipping_zone_id">
-          Shipping zone<span className="text-destructive ml-0.5">*</span>
-        </Label>
-        <Select
-          id="shipping_zone_id"
-          value={form.shipping_zone_id ?? ''}
-          onChange={(e) => {
-            const id = e.target.value ? Number(e.target.value) : null;
-            setForm((f) => ({ ...f, shipping_zone_id: id, shipping_zone_area_id: null }));
-          }}
-          required
-          aria-invalid={!!fieldErrors.shipping_zone_id?.[0]}
-        >
-          <option value="">— Select zone —</option>
-          {zones.map((z) => (
-            <option key={z.id} value={z.id}>{z.name}</option>
-          ))}
-        </Select>
-        {fieldErrors.shipping_zone_id?.[0] && (
-          <p className="text-destructive text-xs">{fieldErrors.shipping_zone_id[0]}</p>
-        )}
-      </div>
-
-      {/* Area — shown only once a zone is selected */}
-      {selectedZone && (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="shipping_zone_area_id">Area</Label>
-          <Select
-            id="shipping_zone_area_id"
-            value={form.shipping_zone_area_id ?? ''}
-            onChange={(e) => {
-              const id = e.target.value ? Number(e.target.value) : null;
-              setForm((f) => ({ ...f, shipping_zone_area_id: id }));
-            }}
-            aria-invalid={!!fieldErrors.shipping_zone_area_id?.[0]}
-          >
-            <option value="">— Select area —</option>
-            {areaOptions.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.area_name}
-                {a.area_type !== 'country' ? ` (${a.area_type})` : ''}
-              </option>
-            ))}
-          </Select>
-          {fieldErrors.shipping_zone_area_id?.[0] && (
-            <p className="text-destructive text-xs">{fieldErrors.shipping_zone_area_id[0]}</p>
-          )}
-        </div>
-      )}
-
-      <Field id="address_line_1" label="Address line 1" required />
-      <Field id="address_line_2" label="Address line 2" />
-      <div className="grid grid-cols-2 gap-4">
-        <Field id="city" label="City" required />
-        <Field id="district" label="District" />
-      </div>
-      <Field id="postal_code" label="Postal code" />
-      <Field id="landmark" label="Landmark (optional)" />
-
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={form.is_default}
-          onChange={(e) => set('is_default', e.target.checked)}
-          className="border-input rounded"
-        />
-        Set as default address
-      </label>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <AddressFields
+        form={form}
+        fieldErrors={fieldErrors}
+        zones={zones}
+        showDefaultToggle
+        disabled={status === 'loading'}
+        onFieldChange={setField}
+      />
 
       {status === 'error' && errorMsg && (
-        <p className="bg-destructive/10 text-destructive rounded-lg px-3.5 py-2.5 text-sm">{errorMsg}</p>
+        <p className="bg-destructive/10 text-destructive rounded-xl px-4 py-3 text-sm">
+          {errorMsg}
+        </p>
       )}
 
-      <div className="flex gap-3 pt-2">
-        <Button type="submit" disabled={status === 'loading'} size="lg" className="flex-1">
-          {status === 'loading' && (
-            <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-            </svg>
-          )}
-          {isEdit ? 'Save changes' : 'Add address'}
-        </Button>
+      <div className="flex flex-col-reverse gap-3 border-t border-border pt-4 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" size="lg" onClick={onCancel}>
           Cancel
+        </Button>
+        <Button type="submit" size="lg" disabled={status === 'loading'}>
+          {status === 'loading' ? 'Saving…' : isEdit ? 'Save changes' : 'Add address'}
         </Button>
       </div>
     </form>

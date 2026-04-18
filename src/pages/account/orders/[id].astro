@@ -43,6 +43,10 @@ const paymentStyles: Record<string, string> = {
   failed:   'text-destructive',
   refunded: 'text-muted-foreground',
 };
+
+function getOrderItemImage(item: Order['items'][number]): string | null {
+  return item.primary_image_thumb_url ?? item.primary_image_url;
+}
 ---
 
 <AccountLayout title={`Order ${order.order_number}`}>
@@ -78,12 +82,30 @@ const paymentStyles: Record<string, string> = {
         <div class="flex flex-col divide-y divide-border rounded-xl border border-border">
           {order.items.map((item) => (
             <div class="flex items-start justify-between gap-4 px-5 py-4">
-              <div class="flex flex-col gap-0.5 text-sm">
-                <p class="font-medium text-foreground">{item.product_name_snapshot}</p>
-                {item.variant_name_snapshot && (
-                  <p class="text-muted-foreground">{item.variant_name_snapshot}</p>
-                )}
-                <p class="text-muted-foreground">Qty: {item.quantity} × {formatMoney(item.unit_price)}</p>
+              <div class="flex items-start gap-4">
+                <div class="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+                  {getOrderItemImage(item) ? (
+                    <img
+                      src={getOrderItemImage(item)}
+                      alt={item.product_name_snapshot}
+                      class="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="flex h-full items-center justify-center text-muted-foreground/30">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div class="flex flex-col gap-0.5 text-sm">
+                  <p class="font-medium text-foreground">{item.product_name_snapshot}</p>
+                  {item.variant_name_snapshot && (
+                    <p class="text-muted-foreground">{item.variant_name_snapshot}</p>
+                  )}
+                  <p class="text-muted-foreground">Qty: {item.quantity} × {formatMoney(item.unit_price)}</p>
+                </div>
               </div>
               <p class="text-sm font-semibold text-foreground shrink-0">
                 {formatMoney(item.line_total)}

@@ -601,6 +601,10 @@ Example response:
         "product_name_snapshot": "Smart Phone",
         "variant_name_snapshot": "128GB",
         "sku_snapshot": "SP-001-128",
+        "primary_image_url": "https://cdn.example.test/products/sp-001.jpg",
+        "primary_image_thumb_url": "https://cdn.example.test/products/conversions/sp-001-thumb.jpg",
+        "primary_image_card_url": "https://cdn.example.test/products/conversions/sp-001-card.jpg",
+        "primary_image_gallery_url": "https://cdn.example.test/products/conversions/sp-001-gallery.jpg",
         "unit_price": 250000,
         "quantity": 2,
         "line_total": 500000
@@ -610,6 +614,13 @@ Example response:
   "errors": null
 }
 ```
+
+Cart item image behavior:
+
+- cart items expose the current product primary image fields, not an order-time snapshot
+- `primary_image_url` is the original image URL
+- `primary_image_thumb_url`, `primary_image_card_url`, and `primary_image_gallery_url` expose conversion-specific URLs
+- if a queued conversion is not ready yet, the backend falls back to the original image URL for that conversion field
 
 #### `PATCH /api/v1/cart/items/{cartItem}`
 
@@ -1018,7 +1029,23 @@ Example response:
     "cart": {
       "id": 1,
       "currency": "GHS",
-      "items": []
+      "items": [
+        {
+          "id": 1,
+          "product_id": 12,
+          "product_variant_id": 44,
+          "product_name_snapshot": "Smart Phone",
+          "variant_name_snapshot": "128GB",
+          "sku_snapshot": "SP-001-128",
+          "primary_image_url": "https://cdn.example.test/products/sp-001.jpg",
+          "primary_image_thumb_url": "https://cdn.example.test/products/conversions/sp-001-thumb.jpg",
+          "primary_image_card_url": "https://cdn.example.test/products/conversions/sp-001-card.jpg",
+          "primary_image_gallery_url": "https://cdn.example.test/products/conversions/sp-001-gallery.jpg",
+          "unit_price": 250000,
+          "quantity": 2,
+          "line_total": 500000
+        }
+      ]
     },
     "address": {
       "id": 10,
@@ -1160,6 +1187,25 @@ Example success response:
       "delivery_notes": "Call on arrival",
       "placed_at": "2026-04-15T12:30:00.000000Z",
       "items": [],
+      "items": [
+        {
+          "id": 1,
+          "product_id": 12,
+          "product_variant_id": 44,
+          "product_name": "Smart Phone",
+          "variant_name": "128GB",
+          "sku": "SP-001-128",
+          "primary_image_url": "https://cdn.example.test/products/sp-001.jpg",
+          "primary_image_thumb_url": "https://cdn.example.test/products/conversions/sp-001-thumb.jpg",
+          "primary_image_card_url": "https://cdn.example.test/products/conversions/sp-001-card.jpg",
+          "primary_image_gallery_url": "https://cdn.example.test/products/conversions/sp-001-gallery.jpg",
+          "unit_price": 250000,
+          "quantity": 2,
+          "discount_amount": 0,
+          "tax_amount": 0,
+          "line_total": 500000
+        }
+      ],
       "shipping_address": {
         "type": "shipping",
         "name": "Ada Doe"
@@ -1175,6 +1221,14 @@ Example success response:
   "errors": null
 }
 ```
+
+Order item image behavior:
+
+- order items expose the current linked product primary image fields when the product still exists
+- `primary_image_url` is the original image URL
+- `primary_image_thumb_url`, `primary_image_card_url`, and `primary_image_gallery_url` expose conversion-specific URLs
+- if a queued conversion is not ready yet, the backend falls back to the original image URL for that conversion field
+- if the linked product or media no longer exists, all four image fields return `null`
 
 Example failure response when order creation succeeds but payment initialization fails:
 
@@ -1302,6 +1356,25 @@ Example response:
     "delivery_notes": "Call on arrival",
     "placed_at": "2026-04-15T12:30:00.000000Z",
     "items": [],
+    "items": [
+      {
+        "id": 1,
+        "product_id": 12,
+        "product_variant_id": 44,
+        "product_name": "Smart Phone",
+        "variant_name": "128GB",
+        "sku": "SP-001-128",
+        "primary_image_url": "https://cdn.example.test/products/sp-001.jpg",
+        "primary_image_thumb_url": "https://cdn.example.test/products/conversions/sp-001-thumb.jpg",
+        "primary_image_card_url": "https://cdn.example.test/products/conversions/sp-001-card.jpg",
+        "primary_image_gallery_url": "https://cdn.example.test/products/conversions/sp-001-gallery.jpg",
+        "unit_price": 250000,
+        "quantity": 2,
+        "discount_amount": 0,
+        "tax_amount": 0,
+        "line_total": 500000
+      }
+    ],
     "shipping_address": {
       "type": "shipping",
       "name": "Ada Doe"
