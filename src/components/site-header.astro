@@ -1,108 +1,77 @@
 ---
 import CartCount from "./cart/cart-count";
+import HeaderSearch from "./header-search";
+import { catalogApi, type Category } from "../api/catalog";
 import { ROUTES } from "../lib/constants";
 
 const pathname = Astro.url.pathname;
+const searchValue = Astro.url.searchParams.get("search") ?? "";
+const activeCategory = Astro.url.searchParams.get("category") ?? "";
+const categoriesResult = await catalogApi
+  .getCategories({ root_only: true })
+  .catch(() => []);
 
 const isActive = (href: string) =>
   href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+function flattenCategories(
+  items: Category[],
+  depth = 0,
+): Array<{
+  label: string;
+  slug: string;
+}> {
+  return items.flatMap((item) => [
+    {
+      slug: item.slug,
+      label: `${depth > 0 ? `${"  ".repeat(depth)} ` : ""}${item.name}`,
+    },
+    ...flattenCategories(item.children ?? [], depth + 1),
+  ]);
+}
+
+const categoryOptions = flattenCategories(categoriesResult);
+
+const mobileLinks = [
+  { href: ROUTES.products, label: "Shop" },
+  { href: ROUTES.collections, label: "Collections" },
+  { href: ROUTES.accountOrders, label: "Account" },
+];
 ---
 
-<div id="site-header-wrap" class="sticky top-0 z-40">
-  <!-- Terracotta brand bar -->
-  <div class="h-[3px] bg-primary w-full"></div>
-
-  <!-- Main header -->
-  <header
-    class="bg-background/95 backdrop-blur-sm shadow-[0_1px_0_0_var(--color-border)]"
-  >
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex h-[62px] items-center justify-between gap-4">
-        <!-- Logo -->
-        <a
-          href={ROUTES.home}
-          class="flex items-center gap-2.5 shrink-0 hover:opacity-80 transition-opacity duration-150"
-          aria-label="Lasid — home"
-        >
-          <img
-            src="/primary-logo.png"
-            alt=""
-            class="h-20 w-auto"
-            aria-hidden="true"
-          />
-          <!-- <span
-            class="font-heading text-[1.35rem] font-bold text-foreground tracking-tight"
-            >Lasid</span -->
-          <!-- > -->
-        </a>
-
-        <!-- Desktop nav -->
-        <nav
-          class="hidden md:flex items-center gap-6 text-sm font-medium"
-          aria-label="Main navigation"
-        >
+<div id="site-header-wrap" class="sticky top-0 z-40 bg-background">
+  <header class="border-b border-border bg-background/95 backdrop-blur-sm">
+    <div
+      class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8"
+    >
+      <div class="flex items-center justify-between gap-3 md:hidden">
+        <div class="flex min-w-0 items-center gap-3">
           <a
-            href={ROUTES.products}
-            class:list={[
-              "transition-colors duration-150 pb-0.5",
-              isActive(ROUTES.products)
-                ? "text-foreground border-b-2 border-primary"
-                : "text-muted-foreground hover:text-foreground",
-            ]}
+            href={ROUTES.home}
+            class="shrink-0 transition-opacity duration-150 hover:opacity-85"
+            aria-label="Lasid home"
           >
-            Shop
+            <img
+              src="/primary-logo.png"
+              alt=""
+              class="h-12 w-auto"
+              aria-hidden="true"
+            />
           </a>
-          <a
-            href={ROUTES.collections}
-            class:list={[
-              "transition-colors duration-150 pb-0.5",
-              isActive(ROUTES.collections)
-                ? "text-foreground border-b-2 border-primary"
-                : "text-muted-foreground hover:text-foreground",
-            ]}
-          >
-            Collections
-          </a>
-        </nav>
+        </div>
 
-        <!-- Right cluster -->
-        <div class="flex items-center gap-0.5">
-          <!-- Search → products page -->
-          <a
-            href={ROUTES.products}
-            class="hidden sm:flex p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150"
-            aria-label="Search products"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-[18px] w-[18px]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1.75"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-              ></path>
-            </svg>
-          </a>
-
-          <!-- Cart -->
+        <div class="flex items-center gap-1">
           <a
             href={ROUTES.cart}
             class:list={[
-              "relative p-2 rounded-lg transition-colors duration-150",
-              isActive(ROUTES.cart)
-                ? "text-foreground bg-muted"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted",
+              "relative rounded-lg p-2 text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground",
+              isActive(ROUTES.cart) && "bg-accent text-accent-foreground",
             ]}
-            aria-label="Cart"
+            aria-label="Open cart"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-[18px] w-[18px]"
+              class="size-4.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -117,47 +86,18 @@ const isActive = (href: string) =>
             <CartCount client:load />
           </a>
 
-          <!-- Account -->
-          <a
-            href={ROUTES.accountOrders}
-            class:list={[
-              "hidden sm:flex p-2 rounded-lg transition-colors duration-150",
-              isActive("/account")
-                ? "text-foreground bg-muted"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted",
-            ]}
-            aria-label="My account"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-[18px] w-[18px]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1.75"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-              ></path>
-            </svg>
-          </a>
-
-          <!-- Mobile menu toggle -->
           <button
             id="menu-toggle"
             type="button"
-            class="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150"
-            aria-label="Toggle menu"
+            class="rounded-lg p-2 text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+            aria-label="Open navigation menu"
             aria-expanded="false"
             aria-controls="mobile-nav"
           >
-            <!-- Hamburger icon -->
             <svg
               id="icon-open"
               xmlns="http://www.w3.org/2000/svg"
-              class="h-[18px] w-[18px]"
+              class="size-4.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -168,11 +108,10 @@ const isActive = (href: string) =>
                 stroke-linejoin="round"
                 d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
             </svg>
-            <!-- Close icon -->
             <svg
               id="icon-close"
               xmlns="http://www.w3.org/2000/svg"
-              class="h-[18px] w-[18px] hidden"
+              class="hidden size-4.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -186,102 +125,54 @@ const isActive = (href: string) =>
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- Mobile nav drawer -->
-    <div
-      id="mobile-nav"
-      class="hidden md:hidden border-t border-border bg-background"
-      aria-label="Mobile navigation"
-    >
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex flex-col gap-0.5">
+      <div class="md:hidden">
+        <HeaderSearch
+          action={ROUTES.products}
+          categories={categoryOptions}
+          defaultCategory={activeCategory}
+          defaultSearch={searchValue}
+          mode="mobile"
+          client:load
+        />
+      </div>
+
+      <div
+        class="hidden md:grid md:grid-cols-[auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-5"
+      >
         <a
-          href={ROUTES.products}
-          class:list={[
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            isActive(ROUTES.products)
-              ? "bg-muted text-foreground"
-              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-          ]}
+          href={ROUTES.home}
+          class="shrink-0 transition-opacity duration-150 hover:opacity-85"
+          aria-label="Lasid home"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="1.75"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"
-            ></path>
-          </svg>
-          Shop
+          <img
+            src="/primary-logo.png"
+            alt=""
+            class="h-14 w-auto"
+            aria-hidden="true"
+          />
         </a>
-        <a
-          href={ROUTES.collections}
-          class:list={[
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            isActive(ROUTES.collections)
-              ? "bg-muted text-foreground"
-              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-          ]}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="1.75"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
-            ></path>
-          </svg>
-          Collections
-        </a>
-        <a
-          href={ROUTES.accountOrders}
-          class:list={[
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            isActive("/account")
-              ? "bg-muted text-foreground"
-              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-          ]}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="1.75"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-            ></path>
-          </svg>
-          Account
-        </a>
+
+        <HeaderSearch
+          action={ROUTES.products}
+          categories={categoryOptions}
+          defaultCategory={activeCategory}
+          defaultSearch={searchValue}
+          mode="desktop"
+          client:load
+        />
+
         <a
           href={ROUTES.cart}
           class:list={[
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            isActive(ROUTES.cart)
-              ? "bg-muted text-foreground"
-              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+            "relative rounded-lg p-2 text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground",
+            isActive(ROUTES.cart) && "bg-accent text-accent-foreground",
           ]}
+          aria-label="Open cart"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 shrink-0"
+            class="size-[18px]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -293,8 +184,50 @@ const isActive = (href: string) =>
               d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.962-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
             ></path>
           </svg>
-          Cart
+          <CartCount client:load />
         </a>
+
+        <a
+          href={ROUTES.accountOrders}
+          class:list={[
+            "rounded-lg border px-4 py-2 text-sm font-medium transition-colors duration-150",
+            isActive("/account")
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border text-foreground hover:bg-muted",
+          ]}
+        >
+          Account
+        </a>
+      </div>
+
+      <div
+        id="mobile-nav"
+        class="hidden border-t border-border pt-3 md:hidden"
+        aria-label="Mobile navigation"
+      >
+        <nav class="flex flex-col gap-1" aria-label="Mobile menu links">
+          {
+            mobileLinks.map((link) => (
+              <a
+                href={link.href}
+                class:list={[
+                  "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+                  isActive(link.href)
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                ]}
+              >
+                {link.label}
+              </a>
+            ))
+          }
+          <a
+            href={ROUTES.authLogin}
+            class="mt-2 rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/90"
+          >
+            Sign in
+          </a>
+        </nav>
       </div>
     </div>
   </header>
@@ -311,15 +244,19 @@ const isActive = (href: string) =>
     nav?.classList.toggle("hidden", isOpen);
     iconOpen?.classList.toggle("hidden", !isOpen);
     iconClose?.classList.toggle("hidden", isOpen);
+    toggle.setAttribute(
+      "aria-label",
+      isOpen ? "Open navigation menu" : "Close navigation menu",
+    );
     toggle.setAttribute("aria-expanded", String(!isOpen));
   });
 
-  // Close on nav link click (mobile UX)
   nav?.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
       nav.classList.add("hidden");
       iconOpen?.classList.remove("hidden");
       iconClose?.classList.add("hidden");
+      toggle?.setAttribute("aria-label", "Open navigation menu");
       toggle?.setAttribute("aria-expanded", "false");
     });
   });
