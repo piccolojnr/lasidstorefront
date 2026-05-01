@@ -1,27 +1,44 @@
 # DESIGN.md
 
-Design identity and principles for the Lasid Storefront.
-
----
+## Design identity and principles for the Lasid Storefront.
 
 ## The Story Behind the Name
 
-Lasid is named after Rashid — a childhood nickname given by his brother, who built this store for him. The name is personal, warm, and human. It is not a brand invented in a boardroom. That origin is the entire design philosophy.
+Lasid is named after Rashid — a childhood nickname given by his brother, who built this store for him.
 
-Every design decision should ask: *does this feel like it was made by a person who cares, or by a company trying to look impressive?*
+This is not a brand invented in a boardroom. It is personal, human, and grounded.
+
+Every design decision should answer:
+
+> _Does this feel like something built by someone who cares, or something designed to impress?_
 
 ---
 
 ## Brand Identity
 
 **What Lasid is:**
-An everyday Ghanaian store. Affordable fashion, lifestyle, books, and general goods for the general public — not a niche premium brand, not a cold global marketplace. The kind of shop you go back to because you trust it, not because it has the best homepage.
+An everyday Ghanaian store — practical, reliable, and easy to use. A place people return to because it works, not because it tries to look expensive.
 
 **What Lasid is not:**
-Luxury. Aspirational. Corporate. It does not compete on prestige. It competes on trust, familiarity, and ease.
+Luxury. Flashy. Over-designed. It does not compete on prestige — it competes on clarity, trust, and ease.
 
-**The one feeling a visitor should leave with:**
-*Relief.* The feeling of walking into a familiar shop and finding what you need at a fair price, without friction or intimidation. Like bumping into someone you know who can help you.
+**Core feeling:**
+_Ease._
+Not excitement. Not prestige. Just: “this is simple, I can get what I need.”
+
+---
+
+## Design Direction
+
+Lasid blends **human warmth** with **modern ecommerce clarity**.
+
+- Layouts are **clean, structured, predictable**
+- Tone is **warm, direct, human**
+- UI is **simple and functional**, not decorative
+
+We are building:
+
+> A clean system with a human soul.
 
 ---
 
@@ -29,141 +46,308 @@ Luxury. Aspirational. Corporate. It does not compete on prestige. It competes on
 
 The brand speaks like a person, not a platform.
 
-| Do | Don't |
-|---|---|
-| "Good prices, every day." | "Discover our curated collection." |
-| "Find what you need." | "Elevate your lifestyle." |
-| "Fast delivery across Ghana." | "Seamless last-mile fulfilment." |
-| Short, direct, honest sentences. | Marketing language, superlatives, buzzwords. |
+| Do                        | Don't                             |
+| ------------------------- | --------------------------------- |
+| "Find what you need."     | "Discover curated collections."   |
+| "Good prices, every day." | "Premium quality selection."      |
+| "Delivered across Ghana." | "Optimized logistics experience." |
 
-Copy should be minimal. Let the products speak. When the brand does speak, it sounds like someone you'd stop and talk to at the market — confident, direct, warm.
+**Rules:**
+
+- Short sentences
+- No buzzwords
+- No exaggeration
+- No corporate language
+
+Let the products speak. When the brand speaks, it is direct and honest.
 
 ---
 
-## Color Palette
+## Color System
 
-The palette is sun-warmed and earthy. It should feel like a bright, well-lit shop — inviting without being loud.
+The interface is neutral-first. Color is used for action and meaning.
 
-| Role | Value | Usage |
-|---|---|---|
-| Background | `#FAF7F2` — warm cream | Page backgrounds, card fills |
-| Foreground | `#1C1410` — deep warm brown | Body text, headings |
-| Primary accent | `#D4521A` — burnt terracotta | CTAs, active states, badges, links |
-| Secondary accent | `#F5A623` — warm amber | Highlights, sale tags, hover accents |
-| Muted | `#EDE8E0` — warm stone | Muted backgrounds, dividers |
-| Muted text | `#7A6E65` — warm mid-grey | Secondary labels, metadata |
-| Success | `#3D7A5C` — earthy green | Confirmation states, in-stock badges |
+---
 
-**Rules:**
-- Never use pure white (`#FFFFFF`) or pure black (`#000000`) — always reach for the warm equivalents.
-- The terracotta is the primary action color. Amber supports it; it is not a peer.
-- Dark sections (hero, CTA banners) use `#1C1410` — the same deep warm brown as body text, not a cold near-black.
-- Avoid cool greys, cool blues, or anything that reads as clinical.
+### Core Palette
+
+| Role           | Value     | Usage            |
+| -------------- | --------- | ---------------- |
+| Background     | `#FFFFFF` | Page background  |
+| Surface        | `#F9FAFB` | Cards, sections  |
+| Border         | `#E5E7EB` | Dividers         |
+| Text Primary   | `#111827` | Headings         |
+| Text Secondary | `#6B7280` | Labels, metadata |
+
+---
+
+### Primary Color (Blue)
+
+```txt
+Primary:        #2563EB
+Primary Hover:  #1D4ED8
+Primary Light:  #DBEAFE
+```
+
+Used for:
+
+- Buttons
+- Links
+- Focus states
+- Active elements
+
+**Rule:** Blue is an accent — not the background.
+
+---
+
+### Functional Colors
+
+| Role    | Value     | Usage            |
+| ------- | --------- | ---------------- |
+| Danger  | `#EF4444` | Discounts, sales |
+| Warning | `#F59E0B` | Low stock        |
+| Success | `#16A34A` | Confirmations    |
+
+---
+
+### Color Rules
+
+- Do not overuse blue
+- Keep UI mostly white and neutral
+- Let product images carry visual weight
+- Avoid gradients and decorative colors
 
 ---
 
 ## Typography
 
-Typography carries the personality of the brand. The choices here are deliberate.
+Typography balances personality with clarity.
+
+---
 
 ### Headings — Lora (serif)
-A humanist serif with warmth and character. It has the weight to command attention but the curves to feel approachable — not stiff like a law firm, not playful like a children's brand. Exactly the balance between trustworthy and human.
 
-Use for: page headings, section titles, product names in hero contexts, the wordmark.
+Used for:
+
+- Page headings
+- Section titles
+- Branding moments
+
+Provides warmth and identity.
+
+---
 
 ### Body — DM Sans
-A low-contrast geometric sans with slightly rounded terminals. Feels clean, modern, and easy to read at small sizes without feeling cold or corporate. A step warmer than Inter.
 
-Use for: body copy, labels, metadata, form fields, navigation.
+Used for:
 
-### Scale and Weight
-- Display headings: `font-heading`, bold (700), tight leading (~1.05)
-- Section headings: `font-heading`, semibold (600), snug leading (~1.15)
-- Body: `font-sans`, regular (400), relaxed leading (~1.6)
-- Labels and metadata: `font-sans`, medium (500), wide tracking
+- Product listings
+- UI labels
+- Forms
+- Navigation
+
+Provides clarity and readability.
+
+---
 
 ### Rules
-- Never use Roboto Slab — too editorial and stiff for this brand.
-- Never use Inter — too generic and cold.
-- Avoid all-caps for anything longer than 4 words.
-- Overlines (small uppercase labels above section headings) are acceptable and add rhythm — but use sparingly.
+
+- Do not overuse serif — reserve it for emphasis
+- Product-heavy areas use sans-serif
+- Avoid all-caps for long text
+- Maintain consistent spacing and hierarchy
 
 ---
 
 ## Layout and Space
 
-**The organizing principle is *organized ease*.**
-
-Think of a well-run market stall — everything has a place, nothing is crammed, you can find things without effort. Not a sterile grid, not visual chaos.
-
-- Generous padding. White (cream) space is not wasted — it is what creates the feeling of ease.
-- Consistent grid: `max-w-7xl` container, `px-4 sm:px-6 lg:px-8` gutters throughout.
-- Cards use `rounded-xl` (slightly generous radius) — warm and approachable, not overly bubbly.
-- Sections breathe: `py-16` minimum vertical rhythm between sections.
-- No full-viewport dark hero sections — they signal luxury and intimidation. The hero should feel welcoming.
+The principle is **organized ease**.
 
 ---
 
-## Imagery and Icons
+### Structure
 
-**Photography (when used):**
-- Bright, natural light. Warm tones. Real people, real settings.
-- No studio-white backgrounds — that reads as premium e-commerce.
-- Ghanaian contexts are a strength, not a constraint. Embrace them.
+- Container: `max-w-7xl`
+- Padding: `px-4 sm:px-6 lg:px-8`
+- Section spacing: `py-12` to `py-16`
 
-**Illustration / placeholders:**
-- Product image placeholders use a warm muted background (`bg-muted`) — never a cold grey.
-- No placeholder gradients or abstract shapes that distract from the product.
+---
 
-**Icons:**
-- Outline style, 1.5px stroke weight (Heroicons or equivalent).
-- Never filled icons for UI chrome — they read as heavy and dated.
-- Icon size in body contexts: 20px (`h-5 w-5`). In display contexts: 24px (`h-6 w-6`).
+### Grid
+
+- Desktop: 4 columns
+- Tablet: 2 columns
+- Mobile: 1–2 columns
+
+---
+
+### Cards
+
+- `rounded-xl`
+- Light border
+- Subtle hover shadow
+
+No heavy shadows. No floating UI.
+
+---
+
+## Imagery
+
+### Products
+
+- Clean, consistent backgrounds
+- Uniform aspect ratios
+- Clear and readable thumbnails
+
+---
+
+### Brand imagery
+
+- Warm, natural lighting
+- Real-life Ghanaian context when used
+- Avoid overly polished or studio-heavy visuals
 
 ---
 
 ## Components and Interaction
 
-**Buttons:**
-- Primary: terracotta fill (`bg-[#D4521A]`), white text, `rounded-lg`, `px-6 py-3`.
-- Secondary / outline: `border-border`, foreground text, same radius.
-- Ghost: no border, muted text — for low-priority actions only.
-- No sharp corners. No pill-shaped buttons (too playful). No gradient fills.
-- Loading states use a spinner in the button, not a separate overlay.
+---
 
-**Cards:**
-- White/cream fill, `border-border`, `rounded-xl`, subtle shadow on hover.
-- No heavy box shadows at rest — the card should sit in the page, not float above it.
+### Buttons
 
-**Forms:**
-- Labels always visible above inputs — no placeholder-only labels.
-- Errors inline, below the field, in terracotta (`text-destructive`).
-- Generous input height (`py-2.5`) — easier to tap on mobile.
+**Primary:**
 
-**Transitions:**
-- `duration-150` to `duration-200` — fast and responsive, not sluggish.
-- Hover: subtle translate (`-translate-y-0.5`) or shadow lift on cards.
-- No dramatic animations on functional UI. Reserve motion for delight moments (empty states, success confirmations).
+- Blue background
+- White text
+- Used for main actions
+
+**Secondary:**
+
+- Outline style
+- Neutral colors
+
+**Rules:**
+
+- No gradients
+- No oversized rounded pills
+- Keep shapes consistent
 
 ---
 
-## Things to Always Avoid
+### Product Cards (Critical)
 
-- Luxury signals: dark editorial heroes, gold-foil effects, "curated collection" language.
-- Generic AI aesthetics: purple gradients, Inter font, cold greys, cookie-cutter layouts.
-- Over-designed empty states or loaders — keep them simple and warm.
-- Aggressive upsell patterns: popups, countdown timers, fake urgency.
-- Anything that makes the user feel watched, pressured, or confused.
+Must include:
+
+- Image
+- Name
+- Price
+- Discount (if applicable)
+
+Optional:
+
+- Rating
+- Sales count
+
+Rules:
+
+- Keep minimal
+- Avoid clutter
+- Prioritize readability
+
+---
+
+### Forms
+
+- Labels always visible
+- Errors inline
+- Inputs large enough for mobile
+
+---
+
+### Interaction
+
+- Fast transitions (`150–200ms`)
+- Subtle hover effects
+- No unnecessary animations
+
+---
+
+## Homepage Philosophy
+
+The homepage is not for showing everything.
+
+It is for:
+
+1. Entry (search or browse)
+2. Discovery (products)
+3. Movement (to product page)
+
+---
+
+### Homepage Sections
+
+- Header (simple, functional)
+- Hero (small, not dominant)
+- Categories
+- Flash Sale
+- Recommended Products
+- Top Stores
+- Trust Section
+- Footer
+
+---
+
+## Product Page Philosophy
+
+This is where conversion happens.
+
+Prioritize:
+
+- Price visibility
+- Variant selection
+- Add to cart
+
+Everything else is secondary.
+
+---
+
+## Mobile Behavior
+
+Mobile is not optional.
+
+- Sticky “Add to Cart” bar
+- Swipeable product images
+- Collapsible sections
+- Large tap targets
+
+---
+
+## Things to Avoid
+
+- Overuse of blue
+- Cluttered layouts
+- Copy-heavy UI
+- Fake urgency patterns
+- Decorative UI without function
 
 ---
 
 ## The Test
 
-Before shipping any design, ask:
+Before shipping any design:
 
-1. Does this feel like a shop run by a person who cares, or a faceless platform?
-2. Would an everyday Ghanaian feel welcome here, or slightly intimidated?
-3. Is this copy honest and direct, or is it trying to sound impressive?
-4. Does the palette feel warm and familiar, or clinical and premium?
+1. Is this easy to scan in 3 seconds?
+2. Can a user act immediately?
+3. Does it feel simple, not empty?
+4. Does it still feel human, not corporate?
 
-If the answers point toward *person, welcome, honest, warm* — ship it.
+If the answer is yes — ship it.
+
+---
+
+## Design System Priorities
+
+1. ProductCard (most important component)
+2. Buttons and interactions
+3. Layout consistency
+4. Mobile usability

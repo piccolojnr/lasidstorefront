@@ -99,7 +99,7 @@ src/
 Defined in `src/lib/constants.ts`:
 
 ```ts
-export const API_BASE = import.meta.env.PUBLIC_API_BASE ?? '/api/v1'
+export const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "/api/v1";
 ```
 
 Set `PUBLIC_API_BASE` in `.env` for local development if the backend runs on a different origin.
@@ -119,3 +119,12 @@ Set `PUBLIC_API_BASE` in `.env` for local development if the backend runs on a d
 - Do not import shadcn components into `.astro` files.
 - Do not add `client:load` to components that do not need interactivity.
 - Do not depend on the coupon endpoints — they are placeholder stubs on the backend.
+
+## UI Design Alignment
+
+- Follow DESIGN.md strictly for all UI decisions.
+- Prefer simple, functional UI over decorative design.
+- ProductCard is the most important reusable component — prioritize its correctness.
+- Do not introduce new colors outside the defined palette.
+- Avoid adding UI features not backed by API data.
+- Mobile behavior must be considered for all interactive components.
