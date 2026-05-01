@@ -104,7 +104,7 @@ export default function HeaderSearch({
         <div
           className={cn(
             "relative flex items-center border-r border-border",
-            isDesktop ? "h-12 min-w-[210px]" : "h-11 max-w-[9.5rem]",
+            isDesktop ? "h-12 min-w-52.5" : "h-11 max-w-38",
           )}
         >
           <Button
