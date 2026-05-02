@@ -31,13 +31,13 @@ const visibleItems = sourceItems.slice(0, maxVisible);
 ---
 
 <div class="overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none]">
-  <div class="flex min-w-max items-start gap-5">
+  <div class="flex min-w-max items-start gap-5 md:justify-center">
     {visibleItems.map((category) => (
       <a
         href={category.href}
         class="group flex w-24 shrink-0 snap-start flex-col items-center text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
       >
-        <div class="flex size-16 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors group-hover:border-foreground/20 group-hover:text-foreground">
+        <div class="flex size-14 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors group-hover:border-foreground/20 group-hover:text-foreground">
           {
             category.imageSrc ? (
               <img
@@ -81,7 +81,7 @@ const visibleItems = sourceItems.slice(0, maxVisible);
       href={viewAllHref}
       class="group flex w-24 shrink-0 snap-start flex-col items-center text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
     >
-      <div class="flex size-16 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors group-hover:border-foreground/20 group-hover:text-foreground">
+      <div class="flex size-14 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors group-hover:border-foreground/20 group-hover:text-foreground">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-6 w-6"

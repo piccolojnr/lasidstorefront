@@ -21,11 +21,12 @@ const cats =
   categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
 const collections =
   collectionsResult.status === "fulfilled" ? collectionsResult.value : [];
-const brands =
-  brandsResult.status === "fulfilled" ? brandsResult.value : [];
+const brands = brandsResult.status === "fulfilled" ? brandsResult.value : [];
 const homepageCollections = collections.slice(0, 5);
 const collectionDetailResults = await Promise.allSettled(
-  homepageCollections.map((collection) => catalogApi.getCollection(collection.slug)),
+  homepageCollections.map((collection) =>
+    catalogApi.getCollection(collection.slug),
+  ),
 );
 const collectionDetails = collectionDetailResults
   .filter((result) => result.status === "fulfilled")
@@ -99,7 +100,10 @@ const heroCategories = cats.slice(0, 8).map((cat) => ({
 >
   <HeroSection slides={heroSlides} categories={heroCategories} />
 
-  <FeaturedCollectionsSection details={collectionDetails} title="Shop by Collection" />
+  <FeaturedCollectionsSection
+    details={collectionDetails}
+    title="Shop by Collection"
+  />
 
   <BrandSection brands={brands} />
 
@@ -120,9 +124,12 @@ const heroCategories = cats.slice(0, 8).map((cat) => ({
   <!-- ── CTA ──────────────────────────────────────────────────────────────── -->
   <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
     <div
-      class="rounded-2xl bg-foreground px-8 py-12 sm:px-12 sm:py-14 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8"
+      class="relative overflow-hidden rounded-2xl bg-foreground px-8 py-12 sm:px-12 sm:py-14 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8"
     >
-      <div>
+      <!-- Subtle radial glow for visual depth -->
+      <div class="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/[0.07] blur-3xl"></div>
+
+      <div class="relative">
         <p
           class="text-primary text-xs font-semibold tracking-[0.2em] uppercase mb-3 flex items-center gap-2"
         >
@@ -138,10 +145,10 @@ const heroCategories = cats.slice(0, 8).map((cat) => ({
           Save addresses, track orders, and check out faster. Free to join.
         </p>
       </div>
-      <div class="flex flex-col sm:flex-row gap-3 shrink-0">
+      <div class="relative flex flex-col sm:flex-row gap-3 shrink-0">
         <a
           href="/auth/login"
-          class="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-colors text-center"
+          class="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-all text-center ring-2 ring-primary/20 ring-offset-2 ring-offset-foreground"
         >
           Create Account
         </a>

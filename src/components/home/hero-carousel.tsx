@@ -45,12 +45,13 @@ export default function HeroCarousel({ slides }: Props) {
       <div className="max-w-7xl mx-auto relative">
         <div
           key={`${activeSlide.title}-${activeIndex}`}
-          className="min-h-72 sm:min-h-88 animate-in fade-in slide-in-from-bottom-2 duration-500"
+          className="min-h-80 sm:min-h-96 animate-in fade-in slide-in-from-bottom-2 duration-500"
         >
           <div className="grid h-full items-center gap-8 px-5 py-8 sm:py-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(16rem,24rem)] lg:gap-10">
             <div className="max-w-lg">
               {activeSlide.eyebrow ? (
-                <p className="text-sm font-semibold tracking-widest uppercase text-primary/70">
+                <p className="flex items-center gap-2.5 text-sm font-semibold tracking-widest uppercase text-primary/70">
+                  <span className="block h-5 w-[3px] rounded-full bg-primary/50" />
                   {activeSlide.eyebrow}
                 </p>
               ) : null}
