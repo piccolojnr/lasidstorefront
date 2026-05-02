@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import AppBootstrap from "../components/auth/app-bootstrap";
 import SiteHeader from "../components/site-header.astro";
-import { ROUTES } from "../lib/constants";
+import SiteFooter from "../components/site-footer.astro";
 
 interface Props {
   title: string;
@@ -40,29 +40,6 @@ const { title, description = "Everyday goods for everyday Ghanaians." } =
       <slot />
     </main>
 
-    <footer class="border-t border-border mt-24">
-      <div
-        class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4"
-      >
-        <a
-          href={ROUTES.home}
-          class="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity"
-          aria-label="Lasid — home"
-        >
-          <img
-            src="/primary-logo.png"
-            alt=""
-            class="h-20 w-auto"
-            aria-hidden="true"
-          />
-        </a>
-        <p class="text-muted-foreground text-sm text-center">
-          Everyday goods for everyday Ghanaians.
-        </p>
-        <p class="text-muted-foreground text-sm">
-          &copy; {new Date().getFullYear()} Lasid
-        </p>
-      </div>
-    </footer>
+    <SiteFooter />
   </body>
 </html>

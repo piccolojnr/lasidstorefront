@@ -1,0 +1,101 @@
+---
+import { ROUTES } from "../lib/constants";
+
+const shopLinks = [
+  { href: ROUTES.products, label: "Products" },
+  { href: ROUTES.collections, label: "Collections" },
+  { href: ROUTES.cart, label: "Cart" },
+];
+
+const supportLinks = [
+  { href: ROUTES.checkout, label: "Checkout Help" },
+  { href: ROUTES.accountOrders, label: "Orders" },
+  { href: ROUTES.accountAddresses, label: "Addresses" },
+];
+
+const companyLinks = [
+  { href: ROUTES.home, label: "Home" },
+  { href: ROUTES.accountProfile, label: "My Account" },
+  { href: ROUTES.authLogin, label: "Sign In" },
+];
+---
+
+<footer class="mt-24 bg-[#111827] text-white">
+  <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="grid gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)] lg:gap-16">
+      <div class="max-w-sm">
+        <a
+          href={ROUTES.home}
+          class="inline-flex items-center gap-3 transition-opacity hover:opacity-85"
+          aria-label="Lasid home"
+        >
+          <img
+            src="/primary-logo.png"
+            alt=""
+            class="h-16 w-auto"
+            aria-hidden="true"
+          />
+        </a>
+        <p class="mt-4 text-sm leading-6 text-white/70">
+          Find what you need, without the stress.
+        </p>
+      </div>
+
+      <div class="grid gap-8 sm:grid-cols-3">
+        <div>
+          <h2 class="text-sm font-semibold text-white">Shop</h2>
+          <ul class="mt-4 flex flex-col gap-3">
+            {shopLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class="text-sm text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:text-white"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-semibold text-white">Support</h2>
+          <ul class="mt-4 flex flex-col gap-3">
+            {supportLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class="text-sm text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:text-white"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-semibold text-white">Company</h2>
+          <ul class="mt-4 flex flex-col gap-3">
+            {companyLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class="text-sm text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:text-white"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 border-t border-white/10 pt-5">
+      <p class="text-sm text-white/55">
+        &copy; {new Date().getFullYear()} Lasid
+      </p>
+    </div>
+  </div>
+</footer>
