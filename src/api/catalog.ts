@@ -67,6 +67,12 @@ export interface ProductVariant {
   is_active: boolean;
 }
 
+export interface ProductStock {
+  quantity: number;
+  status: string;
+  is_backorderable: boolean;
+}
+
 export interface ProductSummary {
   id: number;
   name: string;
@@ -82,6 +88,7 @@ export interface ProductSummary {
   primary_image_gallery_url: string | null;
   category: Pick<Category, 'id' | 'name' | 'slug'> | null;
   brand: Pick<Brand, 'id' | 'name' | 'slug'> | null;
+  stock?: ProductStock | null;
   tags: TagSummary[];
   collections: CollectionSummary[];
 }
