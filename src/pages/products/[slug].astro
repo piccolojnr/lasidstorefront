@@ -1,11 +1,12 @@
 ---
 import Layout from '../../layouts/layout.astro';
-import AddToCart from '../../components/cart/add-to-cart';
-import { catalogApi, type ProductSummary } from '../../api/catalog';
+import ProductImageGallery from '../../components/catalog/product-image-gallery';
+import ProductPurchasePanel from '../../components/catalog/product-purchase-panel';
+import ProductCard from '../../components/catalog/product-card.astro';
+import { catalogApi } from '../../api/catalog';
 import { formatMoney } from '../../lib/money';
 
 const { slug } = Astro.params;
-
 if (!slug) return Astro.redirect('/products');
 
 let product;
@@ -15,152 +16,158 @@ try {
   return Astro.redirect('/products');
 }
 
-const primaryImage = product.images.find((img) => img.is_primary) ?? product.images[0];
-const primaryImageSrc = primaryImage?.gallery_url ?? primaryImage?.url;
-
-const hasDiscount =
-  product.compare_at_price !== null &&
-  product.compare_at_price > product.base_price;
-
-const discountPct = hasDiscount
-  ? Math.round((1 - product.base_price / product.compare_at_price!) * 100)
-  : 0;
-
 const badges = product.badges ?? [];
+const isOnSale = badges.some((b) => b.key === 'on_sale');
 const isNewArrival = badges.some((b) => b.key === 'new_arrival');
+const visibleBadges = badges.slice(0, 3);
+
 const tags = product.tags ?? [];
 const collections = product.collections ?? [];
-
-function getSummaryCardImage(productSummary: ProductSummary): string | null {
-  return productSummary.primary_image_card_url ?? productSummary.primary_image_url;
-}
+const hasRelated = product.related_products.length > 0;
 ---
 
-<Layout title={product.name} description={product.short_description ?? undefined}>
-  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+<Layout
+  title={product.name}
+  description={product.short_description ?? undefined}
+>
+  <!-- Extra bottom padding on mobile to clear the sticky bar -->
+  <div class="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 sm:pb-12 lg:px-8">
 
-    <!-- Breadcrumb -->
-    <nav class="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
-      <a href="/products" class="hover:text-foreground transition-colors">Shop</a>
+    <!-- ── Breadcrumb ───────────────────────────────────────────────── -->
+    <nav
+      aria-label="Breadcrumb"
+      class="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground"
+    >
+      <a href="/products" class="shrink-0 transition-colors hover:text-foreground">
+        Shop
+      </a>
       {product.category && (
         <>
-          <span>/</span>
-          <a href={`/products?category=${product.category.slug}`} class="hover:text-foreground transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          </svg>
+          <a
+            href={`/products?category=${product.category.slug}`}
+            class="shrink-0 transition-colors hover:text-foreground"
+          >
             {product.category.name}
           </a>
         </>
       )}
-      <span>/</span>
-      <span class="text-foreground">{product.name}</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+      </svg>
+      <span class="truncate text-foreground font-medium">{product.name}</span>
     </nav>
 
-    <!-- Main product section -->
-    <div class="grid gap-10 lg:grid-cols-2 lg:gap-16">
+    <!-- ── Main grid ────────────────────────────────────────────────── -->
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
 
-      <!-- Image gallery -->
-      <div class="flex flex-col gap-3">
-        <div class="aspect-square overflow-hidden rounded-2xl bg-muted">
-          {primaryImage ? (
-            <img
-              src={primaryImageSrc}
-              alt={product.name}
-              class="h-full w-full object-cover"
-            />
-          ) : (
-            <div class="flex h-full items-center justify-center text-muted-foreground/30">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-              </svg>
-            </div>
+      <!-- Left: image gallery island -->
+      <ProductImageGallery
+        client:load
+        images={product.images}
+        productName={product.name}
+      />
+
+      <!-- Right: product info -->
+      <div class="flex flex-col gap-5">
+
+        <!-- Brand / category meta -->
+        <div class="flex items-center gap-2 flex-wrap">
+          {product.brand && (
+            <a
+              href={`/brands/${product.brand.slug}`}
+              class="text-xs font-semibold uppercase tracking-widest text-primary transition-colors hover:text-primary/80"
+            >
+              {product.brand.name}
+            </a>
+          )}
+          {product.brand && product.category && (
+            <span class="text-muted-foreground/40 text-xs">·</span>
+          )}
+          {product.category && (
+            <a
+              href={`/products?category=${product.category.slug}`}
+              class="text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {product.category.name}
+            </a>
           )}
         </div>
 
-        <!-- Thumbnails -->
-        {product.images.length > 1 && (
-          <div class="grid grid-cols-5 gap-2">
-            {product.images.map((img) => (
-              <div
-                class:list={[
-                  'aspect-square overflow-hidden rounded-lg border-2',
-                  img.is_primary ? 'border-foreground' : 'border-transparent',
-                ]}
-              >
-                <img
-                  src={img.thumb_url ?? img.url}
-                  alt=""
-                  class="h-full w-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <!-- Product info -->
-      <div class="flex flex-col gap-5">
-        {product.brand && (
-          <p class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            {product.brand.name}
-          </p>
-        )}
-
+        <!-- Title -->
         <div>
-          <h1 class="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h1 class="font-heading text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
             {product.name}
           </h1>
           {product.short_description && (
-            <p class="mt-3 text-base text-muted-foreground leading-relaxed">
+            <p class="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
               {product.short_description}
             </p>
           )}
         </div>
 
         <!-- Badges -->
-        {(hasDiscount || isNewArrival) && (
+        {visibleBadges.length > 0 && (
           <div class="flex flex-wrap gap-2">
-            {hasDiscount && (
-              <span class="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-                -{discountPct}% off
+            {visibleBadges.map((badge) => (
+              <span
+                class:list={[
+                  'rounded-full px-3 py-1 text-xs font-semibold',
+                  badge.key === 'on_sale'
+                    ? 'bg-destructive text-white'
+                    : badge.key === 'new_arrival'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-muted text-muted-foreground',
+                ]}
+              >
+                {badge.key === 'new_arrival' ? 'New arrival' : badge.label}
               </span>
-            )}
-            {isNewArrival && (
-              <span class="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background">
-                New arrival
-              </span>
-            )}
+            ))}
           </div>
         )}
-
-        <!-- Price -->
-        <div class="flex items-baseline gap-3">
-          <span class="text-2xl font-bold text-foreground">
-            {formatMoney(product.base_price)}
-          </span>
-          {hasDiscount && (
-            <>
-              <span class="text-base text-muted-foreground line-through">
-                {formatMoney(product.compare_at_price!)}
-              </span>
-            </>
-          )}
-        </div>
-
-        <hr class="border-border" />
-
-        <!-- Add to cart island -->
-        <AddToCart
-          client:visible
-          productId={product.id}
-          variants={product.variants}
-        />
 
         <!-- SKU -->
         <p class="text-xs text-muted-foreground">SKU: {product.sku}</p>
 
+        <!-- Purchase panel island (price + stock + variants + qty + add-to-cart + mobile sticky) -->
+        <ProductPurchasePanel
+          client:load
+          productId={product.id}
+          basePrice={product.base_price}
+          compareAtPrice={product.compare_at_price}
+          stock={product.stock ?? null}
+          trackInventory={product.track_inventory}
+          allowBackorders={product.allow_backorders}
+          variants={product.variants}
+        />
+
+        <!-- Trust notes -->
+        <div class="flex flex-col gap-2 sm:flex-row sm:gap-5">
+          <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+            Secure payment
+          </span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+            </svg>
+            Delivery across Ghana
+          </span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+            </svg>
+            Easy returns
+          </span>
+        </div>
+
         <!-- Tags -->
         {tags.length > 0 && (
-          <div class="flex flex-wrap gap-1.5">
+          <div class="flex flex-wrap gap-1.5 pt-1">
             {tags.map((tag) => (
               <a
                 href={`/products?tag=${tag.slug}`}
@@ -172,15 +179,15 @@ function getSummaryCardImage(productSummary: ProductSummary): string | null {
           </div>
         )}
 
-        <!-- Collections -->
+        <!-- Collections membership -->
         {collections.length > 0 && (
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-col gap-1.5 pt-1">
             {collections.map((col) => (
               <a
                 href={`/collections/${col.slug}`}
-                class="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                class="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
                 </svg>
                 Part of <span class="font-medium text-foreground">{col.name}</span>
@@ -188,53 +195,31 @@ function getSummaryCardImage(productSummary: ProductSummary): string | null {
             ))}
           </div>
         )}
-
-        <!-- Full description -->
-        {product.description && (
-          <div class="pt-4 border-t border-border">
-            <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Description
-            </h2>
-            <div
-              class="prose prose-sm max-w-none text-muted-foreground"
-              set:html={product.description}
-            />
-          </div>
-        )}
       </div>
     </div>
 
-    <!-- Related products -->
-    {product.related_products.length > 0 && (
-      <section class="mt-20">
-        <h2 class="font-heading mb-6 text-lg font-semibold text-foreground">You may also like</h2>
+    <!-- ── Description ──────────────────────────────────────────────── -->
+    {product.description && (
+      <section class="mt-16 border-t border-border pt-12">
+        <h2 class="font-heading mb-5 text-xl font-bold text-foreground">
+          About this product
+        </h2>
+        <div
+          class="prose prose-sm max-w-3xl text-muted-foreground [&_h2]:font-heading [&_h2]:text-foreground [&_h3]:font-heading [&_h3]:text-foreground [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline"
+          set:html={product.description}
+        />
+      </section>
+    )}
+
+    <!-- ── Related products ─────────────────────────────────────────── -->
+    {hasRelated && (
+      <section class="mt-16 border-t border-border pt-12">
+        <h2 class="font-heading mb-8 text-xl font-bold text-foreground">
+          You may also like
+        </h2>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
           {product.related_products.map((related) => (
-            <a
-              href={`/products/${related.slug}`}
-              class="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div class="aspect-square overflow-hidden bg-muted">
-                {getSummaryCardImage(related) ? (
-                  <img
-                    src={getSummaryCardImage(related)}
-                    alt={related.name}
-                    class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div class="flex h-full items-center justify-center text-muted-foreground/30">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-              <div class="p-3">
-                <p class="line-clamp-2 text-sm font-medium text-foreground">{related.name}</p>
-                <p class="mt-1 text-sm font-semibold text-foreground">{formatMoney(related.base_price)}</p>
-              </div>
-            </a>
+            <ProductCard product={related} />
           ))}
         </div>
       </section>
