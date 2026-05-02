@@ -124,6 +124,8 @@ export interface BrandSummary {
   id: number;
   name: string;
   slug: string;
+  image_url?: string;
+  products_count?: number;
 }
 
 function buildQuery(params: Record<string, unknown>): string {

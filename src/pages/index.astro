@@ -1,15 +1,17 @@
 ---
 import Layout from "../layouts/layout.astro";
 import HeroSection from "../components/home/hero-section.astro";
-import CollectionSection from "../components/home/collection-section.astro";
+import BrandSection from "../components/home/brand-section.astro";
+import FeaturedCollectionsSection from "../components/home/featured-collections-section.astro";
 import ProductSection from "../components/home/product-section.astro";
 import { catalogApi } from "../api/catalog";
 
-const [featuredResult, categoriesResult, collectionsResult] =
+const [featuredResult, categoriesResult, collectionsResult, brandsResult] =
   await Promise.allSettled([
     catalogApi.getProducts({ featured: 1, sort: "latest" }),
     catalogApi.getCategories({ root_only: true }),
     catalogApi.getCollections(),
+    catalogApi.getBrands(),
   ]);
 
 const featured =
@@ -18,7 +20,9 @@ const cats =
   categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
 const collections =
   collectionsResult.status === "fulfilled" ? collectionsResult.value : [];
-const homepageCollections = collections.slice(0, 3);
+const brands =
+  brandsResult.status === "fulfilled" ? brandsResult.value : [];
+const homepageCollections = collections.slice(0, 5);
 const collectionDetailResults = await Promise.allSettled(
   homepageCollections.map((collection) => catalogApi.getCollection(collection.slug)),
 );
@@ -94,15 +98,14 @@ const heroCategories = cats.slice(0, 8).map((cat) => ({
 >
   <HeroSection slides={heroSlides} categories={heroCategories} />
 
-  {
-    collectionDetails.map((detail) => (
-      <CollectionSection detail={detail} />
-    ))
-  }
+  <FeaturedCollectionsSection details={collectionDetails} title="Shop by Collection" />
+
+  <BrandSection brands={brands} />
 
   {
     featured.length > 0 && (
       <ProductSection
+        eyebrow="Hand-picked"
         title="Featured Products"
         description="A simple selection of products worth starting with."
         products={featured}

@@ -4,6 +4,7 @@ import type { ProductSummary } from "../../api/catalog";
 
 interface Props {
   title: string;
+  eyebrow?: string;
   description?: string;
   products?: ProductSummary[] | null;
   viewAllHref?: string;
@@ -11,6 +12,7 @@ interface Props {
 
 const {
   title,
+  eyebrow,
   description,
   products = null,
   viewAllHref,
@@ -21,11 +23,18 @@ const hasProducts = Array.isArray(products) && products.length > 0;
 const isEmpty = Array.isArray(products) && products.length === 0;
 ---
 
-<section class="bg-background py-12 lg:py-16">
+<section class="bg-background py-14 lg:py-20">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="mb-8 flex items-end justify-between gap-4">
+    <div class="mb-10 flex items-end justify-between gap-4">
       <div class="max-w-2xl">
-        <h2 class="font-heading text-2xl font-bold text-foreground sm:text-3xl">
+        {
+          eyebrow && (
+            <p class="text-xs font-semibold uppercase tracking-widest text-primary">
+              {eyebrow}
+            </p>
+          )
+        }
+        <h2 class:list={["font-heading text-2xl font-bold text-foreground sm:text-3xl", eyebrow && "mt-1.5"]}>
           {title}
         </h2>
         {
@@ -40,9 +49,12 @@ const isEmpty = Array.isArray(products) && products.length === 0;
         viewAllHref && (
           <a
             href={viewAllHref}
-            class="shrink-0 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            class="group shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            View All →
+            View All
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
           </a>
         )
       }
