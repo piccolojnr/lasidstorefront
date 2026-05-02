@@ -1,0 +1,80 @@
+---
+import ProductCard from "../catalog/product-card.astro";
+import type { ProductSummary } from "../../api/catalog";
+
+interface Props {
+  title: string;
+  description?: string;
+  products?: ProductSummary[] | null;
+  viewAllHref?: string;
+}
+
+const {
+  title,
+  description,
+  products = null,
+  viewAllHref,
+} = Astro.props;
+
+const isLoading = products === null;
+const hasProducts = Array.isArray(products) && products.length > 0;
+const isEmpty = Array.isArray(products) && products.length === 0;
+---
+
+<section class="bg-background py-12 lg:py-16">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="mb-8 flex items-end justify-between gap-4">
+      <div class="max-w-2xl">
+        <h2 class="font-heading text-2xl font-bold text-foreground sm:text-3xl">
+          {title}
+        </h2>
+        {
+          description && (
+            <p class="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+              {description}
+            </p>
+          )
+        }
+      </div>
+      {
+        viewAllHref && (
+          <a
+            href={viewAllHref}
+            class="shrink-0 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            View All →
+          </a>
+        )
+      }
+    </div>
+
+    {
+      isLoading ? (
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map(() => (
+            <div class="overflow-hidden rounded-xl border border-border bg-background">
+              <div class="aspect-square animate-pulse bg-muted"></div>
+              <div class="space-y-3 p-4">
+                <div class="h-3 w-16 animate-pulse rounded bg-muted"></div>
+                <div class="h-4 w-full animate-pulse rounded bg-muted"></div>
+                <div class="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
+                <div class="h-4 w-24 animate-pulse rounded bg-muted"></div>
+                <div class="h-9 w-full animate-pulse rounded-lg bg-muted"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : hasProducts ? (
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard product={product} />
+          ))}
+        </div>
+      ) : isEmpty ? (
+        <div class="py-12 text-center">
+          <p class="text-sm text-muted-foreground">No products available</p>
+        </div>
+      ) : null
+    }
+  </div>
+</section>

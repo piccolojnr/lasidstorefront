@@ -2,7 +2,7 @@
 import Layout from "../layouts/layout.astro";
 import HeroSection from "../components/home/hero-section.astro";
 import CollectionSection from "../components/home/collection-section.astro";
-import ProductGrid from "../components/catalog/product-grid.astro";
+import ProductSection from "../components/home/product-section.astro";
 import { catalogApi } from "../api/catalog";
 
 const [featuredResult, categoriesResult, collectionsResult] =
@@ -100,40 +100,14 @@ const heroCategories = cats.slice(0, 8).map((cat) => ({
     ))
   }
 
-  <!-- ── Featured Products ─────────────────────────────────────────────────── -->
   {
     featured.length > 0 && (
-      <section class="bg-muted border-y border-border py-16 lg:py-20">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div class="flex items-end justify-between mb-8 gap-4">
-            <div>
-              <p class="text-muted-foreground text-xs font-semibold tracking-[0.2em] uppercase mb-1.5">
-                Handpicked
-              </p>
-              <h2 class="font-heading text-foreground text-2xl sm:text-3xl font-bold">
-                Featured Products
-              </h2>
-            </div>
-            <a
-              href="/products?featured=1"
-              class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block shrink-0"
-            >
-              View all →
-            </a>
-          </div>
-
-          <ProductGrid products={featured} />
-
-          <div class="sm:hidden mt-5 text-center">
-            <a
-              href="/products?featured=1"
-              class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              View all →
-            </a>
-          </div>
-        </div>
-      </section>
+      <ProductSection
+        title="Featured Products"
+        description="A simple selection of products worth starting with."
+        products={featured}
+        viewAllHref="/products?featured=1"
+      />
     )
   }
 
