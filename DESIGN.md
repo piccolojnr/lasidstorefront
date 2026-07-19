@@ -1,10 +1,10 @@
 # DESIGN.md
 
-## Design identity and principles for the Lasid Storefront.
+## Design identity and principles for the Backthred Storefront.
 
 ## The Story Behind the Name
 
-Lasid is named after Rashid — a childhood nickname given by his brother, who built this store for him.
+Backthred is named after Rashid — a childhood nickname given by his brother, who built this store for him.
 
 This is not a brand invented in a boardroom. It is personal, human, and grounded.
 
@@ -16,10 +16,10 @@ Every design decision should answer:
 
 ## Brand Identity
 
-**What Lasid is:**
+**What Backthred is:**
 An everyday Ghanaian store — practical, reliable, and easy to use. A place people return to because it works, not because it tries to look expensive.
 
-**What Lasid is not:**
+**What Backthred is not:**
 Luxury. Flashy. Over-designed. It does not compete on prestige — it competes on clarity, trust, and ease.
 
 **Core feeling:**
@@ -30,7 +30,7 @@ Not excitement. Not prestige. Just: “this is simple, I can get what I need.”
 
 ## Design Direction
 
-Lasid blends **human warmth** with **modern ecommerce clarity**.
+Backthred blends **human warmth** with **modern ecommerce clarity**.
 
 - Layouts are **clean, structured, predictable**
 - Tone is **warm, direct, human**

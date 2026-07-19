@@ -1,12 +1,12 @@
 # BRAND.md
 
-Brand document for the Lasid storefront.
+Brand document for the Backthred storefront.
 
 ---
 
 ## Brand Core
 
-Lasid is an everyday Ghanaian store for practical buying: fashion, lifestyle goods, books, and household essentials. It should feel local, trustworthy, and easy to use.
+Backthred is an everyday Ghanaian store for practical buying: fashion, lifestyle goods, books, and household essentials. It should feel local, trustworthy, and easy to use.
 
 The brand is not built around prestige. It is built around familiarity, fairness, and relief. The customer should feel like they have arrived somewhere straightforward, useful, and human.
 
@@ -18,7 +18,7 @@ The working brand promise:
 
 ## Origin
 
-Lasid comes from Rashid's nickname. That matters because the storefront should never read like a polished corporate marketplace with borrowed luxury cues. It should feel personal and cared for.
+Backthred comes from Rashid's nickname. That matters because the storefront should never read like a polished corporate marketplace with borrowed luxury cues. It should feel personal and cared for.
 
 When choosing copy, visuals, or interaction patterns, prefer the option that feels like it came from a real shopkeeper over the option that feels like it came from a growth team.
 
@@ -26,7 +26,7 @@ When choosing copy, visuals, or interaction patterns, prefer the option that fee
 
 ## Positioning
 
-**Lasid is:**
+**Backthred is:**
 
 - Warm
 - Practical
@@ -35,7 +35,7 @@ When choosing copy, visuals, or interaction patterns, prefer the option that fee
 - Local in feel
 - Modern without being slick
 
-**Lasid is not:**
+**Backthred is not:**
 
 - Luxury
 - Aspirational-for-its-own-sake
@@ -83,7 +83,7 @@ The site should not feel like:
 
 ## Voice
 
-Lasid speaks plainly. The tone is direct, calm, and helpful.
+Backthred speaks plainly. The tone is direct, calm, and helpful.
 
 Use:
 
@@ -204,7 +204,7 @@ If an interaction is visually impressive but slows down understanding, it is off
 
 ## Trust Signals
 
-Lasid should consistently reinforce a few simple promises:
+Backthred should consistently reinforce a few simple promises:
 
 - Authentic products
 - Fair, visible pricing

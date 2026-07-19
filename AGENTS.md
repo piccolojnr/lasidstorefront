@@ -1,6 +1,6 @@
 # AGENTS.md
 
-AI agent guidance for the Lasid Storefront project.
+AI agent guidance for the Backthred Storefront project.
 
 ## Stack
 
