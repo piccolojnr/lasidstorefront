@@ -1,0 +1,47 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  ctaLabel: string;
+  href: string;
+  imageSrc: string;
+}
+
+const { eyebrow, title, ctaLabel, href, imageSrc } = Astro.props;
+---
+
+<section class="bg-background py-8 sm:py-10">
+  <div class="mx-auto max-w-360 px-4 sm:px-6 lg:px-8">
+    <a
+      href={href}
+      class="group relative block min-h-40 overflow-hidden rounded-xl bg-primary"
+    >
+      <img
+        src={imageSrc}
+        alt=""
+        class="absolute inset-0 h-full w-full object-cover opacity-70 transition-transform duration-500 group-hover:scale-[1.02]"
+        loading="lazy"
+        aria-hidden="true"
+      />
+      <div
+        class="absolute inset-0 bg-linear-to-r from-primary via-primary/70 to-primary/10"
+      >
+      </div>
+      <div class="relative max-w-xl p-6 sm:p-8">
+        <p class="text-xs font-semibold text-primary-foreground/75">
+          {eyebrow}
+        </p>
+        <h2
+          class="mt-1 font-heading text-2xl font-bold text-primary-foreground sm:text-3xl"
+        >
+          {title}
+        </h2>
+        <span
+          class="mt-5 inline-flex rounded-lg bg-background px-4 py-2 text-sm font-semibold text-primary transition-colors group-hover:bg-background/90"
+        >
+          {ctaLabel}
+        </span>
+      </div>
+    </a>
+  </div>
+</section>

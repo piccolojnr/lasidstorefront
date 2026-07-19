@@ -42,7 +42,7 @@ export default function HeroCarousel({ slides }: Props) {
       onBlurCapture={() => setIsPaused(false)}
       style={{ isolation: "isolate" }}
     >
-      <div className="max-w-7xl mx-auto relative">
+      <div className="max-w-360 mx-auto relative">
         <div
           key={`${activeSlide.title}-${activeIndex}`}
           className="min-h-80 sm:min-h-96 animate-in fade-in slide-in-from-bottom-2 duration-500"

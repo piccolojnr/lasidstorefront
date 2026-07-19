@@ -80,6 +80,9 @@ export interface ProductSummary {
   sku: string;
   base_price: number;
   compare_at_price: number | null;
+  is_on_sale?: boolean;
+  discount_amount?: number | null;
+  discount_percentage?: number | null;
   is_featured: boolean;
   badges: Badge[];
   primary_image_url: string | null;
@@ -114,7 +117,9 @@ export interface ProductsQuery {
   tag?: string;
   collection?: string;
   featured?: boolean | 1 | 0;
-  sort?: 'latest' | 'price_asc' | 'price_desc';
+  on_sale?: boolean | 1 | 0;
+  sort?: 'latest' | 'oldest' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc' | 'popular';
+  popularity_period?: '7d' | '30d' | '365d' | 'all';
   page?: number;
   min_price?: number;
   max_price?: number;

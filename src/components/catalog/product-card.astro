@@ -1,5 +1,6 @@
 ---
 import CardAddToCartButton from "../cart/card-add-to-cart-button";
+import WishlistButton from "./wishlist-button";
 import { formatMoney } from "../../lib/money";
 import type { ProductSummary, Badge } from "../../api/catalog";
 
@@ -16,6 +17,14 @@ const sourceLabel = product.category?.name ?? product.brand?.name ?? null;
 const hasCompareAtPrice =
   product.compare_at_price !== null &&
   product.compare_at_price > product.base_price;
+const isOnSale =
+  product.is_on_sale === true ||
+  hasCompareAtPrice ||
+  product.badges?.some((badge) => badge.key === "on_sale");
+const discountPercentage =
+  typeof product.discount_percentage === "number"
+    ? Math.round(product.discount_percentage)
+    : null;
 
 const visibleBadges = (product.badges ?? [])
   .filter(
@@ -111,9 +120,18 @@ if (stock) {
               {badge.key === "new_arrival" ? "New" : badge.label}
             </span>
           ))}
+          {isOnSale && discountPercentage && (
+            <span class="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white shadow-sm sm:px-2 sm:py-1 sm:text-[11px]">
+              -{discountPercentage}%
+            </span>
+          )}
         </div>
       )
     }
+
+    <div class="absolute right-2 top-2">
+      <WishlistButton productId={product.id} client:load />
+    </div>
   </a>
 
   <div class="flex flex-1 flex-col p-3 sm:p-4">

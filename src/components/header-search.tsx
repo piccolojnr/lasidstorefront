@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { IconChevronDown, IconSearch } from "@tabler/icons-react";
+import { IconCheck, IconChevronDown, IconSearch } from "@tabler/icons-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +17,7 @@ type HeaderSearchProps = {
   defaultCategory?: string;
   defaultSearch?: string;
   mode?: "desktop" | "mobile";
+  placeholder?: string;
 };
 
 export default function HeaderSearch({
@@ -26,16 +26,43 @@ export default function HeaderSearch({
   defaultCategory = "",
   defaultSearch = "",
   mode = "desktop",
+  placeholder = "Search products",
 }: HeaderSearchProps) {
   const [selectedCategory, setSelectedCategory] =
     React.useState(defaultCategory);
   const [isOpen, setIsOpen] = React.useState(false);
-  const [filterValue, setFilterValue] = React.useState("");
+
   const rootRef = React.useRef<HTMLDivElement | null>(null);
-  const filterInputRef = React.useRef<HTMLInputElement | null>(null);
+  const triggerRef = React.useRef<HTMLButtonElement | null>(null);
+
+  const searchInputId = React.useId();
+  const categoryListId = React.useId();
+
+  const isDesktop = mode === "desktop";
+
+  const allOptions = React.useMemo(
+    () => [{ slug: "", label: "All categories" }, ...categories],
+    [categories],
+  );
+
+  const selectedLabel =
+    allOptions.find((option) => option.slug === selectedCategory)?.label ??
+    "All categories";
+
+  const triggerLabel = isDesktop
+    ? selectedLabel
+    : selectedCategory
+      ? selectedLabel
+      : "All";
 
   React.useEffect(() => {
-    if (!isOpen) return;
+    setSelectedCategory(defaultCategory);
+  }, [defaultCategory]);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
 
     const handlePointerDown = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) {
@@ -46,6 +73,7 @@ export default function HeaderSearch({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsOpen(false);
+        triggerRef.current?.focus();
       }
     };
 
@@ -58,162 +86,138 @@ export default function HeaderSearch({
     };
   }, [isOpen]);
 
-  React.useEffect(() => {
-    if (isOpen) {
-      filterInputRef.current?.focus();
-    } else {
-      setFilterValue("");
-    }
-  }, [isOpen]);
+  const selectCategory = (slug: string) => {
+    setSelectedCategory(slug);
+    setIsOpen(false);
 
-  const allOptions = [{ slug: "", label: "All categories" }, ...categories];
-
-  const query = filterValue.trim().toLowerCase();
-  const filteredOptions = !query
-    ? allOptions
-    : allOptions.filter((option) => option.label.toLowerCase().includes(query));
-
-  const selectedLabel =
-    allOptions.find((option) => option.slug === selectedCategory)?.label ??
-    "All categories";
-
-  const isDesktop = mode === "desktop";
-  const triggerLabel = isDesktop
-    ? selectedLabel
-    : selectedCategory
-      ? selectedLabel
-      : "Category";
+    window.requestAnimationFrame(() => {
+      triggerRef.current?.focus();
+    });
+  };
 
   return (
     <form
       action={action}
       method="GET"
       role="search"
-      className={cn("w-full", isDesktop ? "mx-auto" : "")}
+      className="w-full max-w-xl "
     >
       <input type="hidden" name="category" value={selectedCategory} />
+
       <div
         ref={rootRef}
         className={cn(
-          "relative rounded-xl border border-input bg-card transition-[border-color,box-shadow]",
-          "focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20",
-          "flex items-center",
-          isDesktop ? "min-h-12" : "min-h-11",
+          "relative flex w-full items-center rounded-full",
+          "border border-border bg-background",
+          "transition-[border-color,box-shadow] duration-150",
+          "focus-within:border-primary/45",
+          "focus-within:ring-2 focus-within:ring-primary/10",
+          isDesktop ? "h-9" : "h-10",
         )}
       >
-        <div
+        <label htmlFor={searchInputId} className="sr-only">
+          Search products
+        </label>
+
+        <IconSearch
+          aria-hidden="true"
+          className="ml-3.5 size-3.5 shrink-0 text-muted-foreground"
+        />
+
+        <Input
+          id={searchInputId}
+          type="search"
+          name="search"
+          defaultValue={defaultSearch}
+          placeholder={placeholder}
+          autoComplete="off"
+          enterKeyHint="search"
           className={cn(
-            "relative flex items-center border-r border-border",
-            isDesktop ? "h-12 min-w-52.5" : "h-11 max-w-38",
+            "h-full min-w-0 flex-1",
+            "border-0 bg-transparent px-2.5",
+            "text-[13px] shadow-none",
+            "placeholder:text-muted-foreground/75",
+            "focus-visible:ring-0",
           )}
-        >
-          <Button
+        />
+
+        <div className="relative h-full shrink-0">
+          <button
+            ref={triggerRef}
             type="button"
-            variant="ghost"
-            className={cn(
-              "w-full justify-between rounded-none border-0 text-sm font-medium text-foreground shadow-none hover:bg-muted/70",
-              isDesktop ? "h-12 rounded-l-xl px-4" : "h-11 rounded-l-xl px-3",
-            )}
             aria-haspopup="listbox"
             aria-expanded={isOpen}
-            onClick={() => setIsOpen((open) => !open)}
+            aria-controls={categoryListId}
+            onClick={() => setIsOpen((current) => !current)}
+            className={cn(
+              "flex h-full min-w-0 items-center gap-1.5",
+              "border-l border-border/80 bg-transparent",
+              "text-xs font-normal text-muted-foreground",
+              "outline-none transition-colors",
+              "hover:text-foreground",
+              "focus-visible:text-foreground",
+              isDesktop ? "max-w-40 px-3.5" : "max-w-24 px-3",
+            )}
           >
-            <span className="truncate text-left">{triggerLabel}</span>
+            <span className="truncate">{triggerLabel}</span>
+
             <IconChevronDown
+              aria-hidden="true"
               className={cn(
-                "text-muted-foreground transition-transform",
+                "size-3 shrink-0 transition-transform duration-150",
                 isOpen && "rotate-180",
               )}
             />
-          </Button>
+          </button>
 
-          {isOpen ? (
+          {isOpen && (
             <div
+              id={categoryListId}
+              role="listbox"
+              aria-label="Product categories"
               className={cn(
-                "absolute left-0 top-[calc(100%+0.5rem)] z-50 rounded-xl border border-border bg-background p-2 shadow-sm",
-                isDesktop
-                  ? "w-full min-w-[18rem] max-w-sm"
-                  : "w-[min(20rem,calc(100vw-2rem))]",
+                "absolute right-0 top-[calc(100%+0.5rem)] z-50",
+                "w-[min(17rem,calc(100vw-2rem))]",
+                "rounded-xl border border-border",
+                "bg-popover p-1.5 text-popover-foreground",
+                "shadow-lg shadow-black/5",
               )}
             >
-              <div className="flex items-center gap-2 rounded-lg border border-input bg-card px-3">
-                <IconSearch className="size-4 text-muted-foreground" />
-                <Input
-                  ref={filterInputRef}
-                  value={filterValue}
-                  onChange={(event) => setFilterValue(event.target.value)}
-                  placeholder="Find a category"
-                  className="h-10 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-                />
-              </div>
+              <div className="max-h-72 overflow-y-auto overscroll-contain">
+                {allOptions.map((option) => {
+                  const isSelected = option.slug === selectedCategory;
 
-              <div className="mt-2 max-h-72 overflow-y-auto">
-                {filteredOptions.length > 0 ? (
-                  <div className="flex flex-col gap-1">
-                    {filteredOptions.map((option) => {
-                      const isSelected = option.slug === selectedCategory;
+                  return (
+                    <button
+                      key={option.slug || "all-categories"}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => selectCategory(option.slug)}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-3",
+                        "rounded-lg px-3 py-2 text-left text-sm",
+                        "outline-none transition-colors",
+                        "hover:bg-muted",
+                        "focus-visible:bg-muted",
+                        isSelected && "bg-muted/70 text-foreground",
+                      )}
+                    >
+                      <span className="truncate">{option.label}</span>
 
-                      return (
-                        <button
-                          key={option.slug || "all-categories"}
-                          type="button"
-                          className={cn(
-                            "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                            isSelected
-                              ? "bg-accent text-accent-foreground"
-                              : "text-foreground hover:bg-muted",
-                          )}
-                          onClick={() => {
-                            setSelectedCategory(option.slug);
-                            setIsOpen(false);
-                          }}
-                        >
-                          <span className="truncate">{option.label}</span>
-                          {isSelected ? (
-                            <span className="text-xs font-medium text-muted-foreground">
-                              Selected
-                            </span>
-                          ) : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="rounded-lg px-3 py-6 text-center text-sm text-muted-foreground">
-                    No categories found
-                  </div>
-                )}
+                      {isSelected && (
+                        <IconCheck
+                          aria-hidden="true"
+                          className="size-3.5 shrink-0 text-primary"
+                          stroke={2.25}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          ) : null}
-        </div>
-
-        <div
-          className={cn(
-            "flex min-w-0 flex-1 items-center",
-            isDesktop ? "px-4" : "px-3",
           )}
-        >
-          <label htmlFor={`${mode}-site-search`} className="sr-only">
-            Search products
-          </label>
-          <IconSearch className="size-4 shrink-0 text-muted-foreground" />
-          <Input
-            id={`${mode}-site-search`}
-            type="search"
-            name="search"
-            defaultValue={defaultSearch}
-            placeholder="Search products"
-            className="h-11 border-0 bg-transparent px-3 shadow-none focus-visible:ring-0"
-          />
-          <Button
-            type="submit"
-            variant="ghost"
-            className="ml-1 shrink-0 text-muted-foreground hover:bg-muted hover:text-foreground"
-            aria-label="Submit product search"
-          >
-            Search
-          </Button>
         </div>
       </div>
     </form>

@@ -1,0 +1,226 @@
+---
+interface PromoCard {
+  title: string;
+  text: string;
+  href: string;
+  imageSrc: string;
+}
+
+interface HeroContent {
+  eyebrow: string;
+  title: string;
+  description: string;
+  primaryCta: string;
+  primaryHref: string;
+  secondaryCta: string;
+  secondaryHref: string;
+  imageSrc: string;
+  imageAlt: string;
+}
+
+interface Props {
+  hero: HeroContent;
+  sidePromos: PromoCard[];
+}
+
+const { hero, sidePromos } = Astro.props;
+---
+
+<section
+  class="bg-background
+    px-3 py-3
+    sm:px-4 sm:py-4
+    lg:h-[calc(100svh-var(--site-header-height))]
+    lg:px-0"
+>
+  <div
+    class="mx-auto grid h-full max-w-360 gap-3
+      sm:gap-4
+      lg:grid-cols-[minmax(0,1fr)_18rem]
+      lg:px-6
+      xl:grid-cols-[minmax(0,1fr)_20rem]
+      xl:px-8"
+  >
+    <!-- Main hero -->
+    <div
+      class="group relative
+        min-h-[calc(100svh-var(--site-header-height)-1.5rem)]
+        overflow-hidden rounded-2xl bg-foreground
+        sm:min-h-[34rem]
+        lg:h-full lg:min-h-0
+        lg:rounded-3xl"
+    >
+      <img
+        src={hero.imageSrc}
+        alt={hero.imageAlt}
+        class="absolute inset-0 h-full w-full object-cover
+          transition-transform duration-700 ease-out
+          group-hover:scale-[1.015]"
+        loading="eager"
+        fetchpriority="high"
+      />
+
+      <div
+        class="absolute inset-0
+          bg-linear-to-r
+          from-black/75 via-black/35 to-black/5"
+      >
+      </div>
+
+      <div
+        class="absolute inset-0
+          bg-linear-to-t
+          from-black/65 via-transparent to-black/5"
+      >
+      </div>
+
+      <div
+        class="relative flex h-full max-w-4xl flex-col justify-end
+          p-6
+          sm:p-9
+          lg:p-12
+          xl:p-14"
+      >
+        <p
+          class="mb-4 w-fit rounded-full
+            bg-primary px-3.5 py-1.5
+            text-[11px] font-semibold tracking-wide
+            text-primary-foreground
+            sm:text-xs"
+        >
+          {hero.eyebrow}
+        </p>
+
+        <h1
+          class="max-w-3xl font-heading
+            text-4xl font-bold leading-[1.04] tracking-tight
+            text-white
+            sm:text-5xl
+            lg:text-6xl
+            xl:text-360"
+        >
+          {hero.title}
+        </h1>
+
+        <p
+          class="mt-4 max-w-2xl
+            text-base leading-7 text-white/80
+            sm:text-lg sm:leading-8"
+        >
+          {hero.description}
+        </p>
+
+        <div class="mt-7 flex flex-wrap gap-3">
+          <a
+            href={hero.primaryHref}
+            class="inline-flex min-h-12 items-center justify-center
+              rounded-xl bg-primary px-6
+              text-sm font-semibold text-primary-foreground
+              transition-colors hover:bg-primary/90"
+          >
+            {hero.primaryCta}
+          </a>
+
+          <a
+            href={hero.secondaryHref}
+            class="inline-flex min-h-12 items-center justify-center
+              rounded-xl border border-white/25
+              bg-white/10 px-6
+              text-sm font-semibold text-white
+              backdrop-blur-sm
+              transition-colors
+              hover:bg-white/18"
+          >
+            {hero.secondaryCta}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side promotions -->
+    <div
+      class="grid gap-3
+        sm:grid-cols-3 sm:gap-4
+        lg:h-full lg:grid-cols-1 lg:grid-rows-3"
+    >
+      {
+        sidePromos.slice(0, 3).map((promo) => (
+          <a
+            href={promo.href}
+            class="
+              group relative
+              min-h-52 overflow-hidden rounded-2xl
+              bg-foreground
+              sm:min-h-48
+              lg:min-h-0
+              lg:rounded-3xl
+            "
+            aria-label={promo.title}
+          >
+            <img
+              src={promo.imageSrc}
+              alt=""
+              class="
+                absolute inset-0 h-full w-full object-cover
+                transition-transform duration-700 ease-out
+                group-hover:scale-[1.04]
+              "
+              loading="lazy"
+              aria-hidden="true"
+            />
+
+            <div
+              class="
+                absolute inset-0
+                bg-linear-to-t
+                from-black/80 via-black/20 to-transparent
+              "
+            />
+
+            <div
+              class="
+                relative flex h-full flex-col justify-end
+                p-5
+                lg:p-6
+              "
+            >
+              <h2
+                class="
+                  font-heading text-lg font-bold leading-tight
+                  text-white
+                  lg:text-xl
+                "
+              >
+                {promo.title}
+              </h2>
+
+              <p
+                class="
+                  mt-1.5 text-sm leading-5
+                  text-white/75
+                "
+              >
+                {promo.text}
+              </p>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  :root {
+    /*
+     * Fallback used before the ResizeObserver measures the real header.
+     */
+    --site-header-height: 8rem;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --site-header-height: 7.75rem;
+    }
+  }
+</style>

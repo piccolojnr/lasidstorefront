@@ -23,9 +23,9 @@ const hasProducts = Array.isArray(products) && products.length > 0;
 const isEmpty = Array.isArray(products) && products.length === 0;
 ---
 
-<section class="bg-background py-14 lg:py-20">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="mb-8 flex items-end justify-between gap-4">
+<section class="bg-background py-8 sm:py-10">
+  <div class="mx-auto max-w-360 px-4 sm:px-6 lg:px-8">
+    <div class="mb-5 flex items-end justify-between gap-4">
       <div class="max-w-2xl">
         {
           eyebrow && (
@@ -34,7 +34,12 @@ const isEmpty = Array.isArray(products) && products.length === 0;
             </p>
           )
         }
-        <h2 class:list={["font-heading text-2xl font-bold text-foreground sm:text-3xl", eyebrow && "mt-1.5"]}>
+        <h2
+          class:list={[
+            "font-heading text-2xl font-bold text-foreground sm:text-3xl",
+            eyebrow && "mt-1.5",
+          ]}
+        >
           {title}
         </h2>
         {
@@ -52,8 +57,19 @@ const isEmpty = Array.isArray(products) && products.length === 0;
             class="group shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             View All
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
             </svg>
           </a>
         )
@@ -65,19 +81,19 @@ const isEmpty = Array.isArray(products) && products.length === 0;
         <div class="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map(() => (
             <div class="overflow-hidden rounded-xl border border-border bg-background">
-              <div class="aspect-square animate-pulse bg-muted"></div>
+              <div class="aspect-square animate-pulse bg-muted" />
               <div class="space-y-3 p-4">
-                <div class="h-3 w-16 animate-pulse rounded bg-muted"></div>
-                <div class="h-4 w-full animate-pulse rounded bg-muted"></div>
-                <div class="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
-                <div class="h-4 w-24 animate-pulse rounded bg-muted"></div>
-                <div class="h-9 w-full animate-pulse rounded-lg bg-muted"></div>
+                <div class="h-3 w-16 animate-pulse rounded bg-muted" />
+                <div class="h-4 w-full animate-pulse rounded bg-muted" />
+                <div class="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                <div class="h-4 w-24 animate-pulse rounded bg-muted" />
+                <div class="h-9 w-full animate-pulse rounded-lg bg-muted" />
               </div>
             </div>
           ))}
         </div>
       ) : hasProducts ? (
-        <div class="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard product={product} />
           ))}

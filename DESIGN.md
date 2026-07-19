@@ -167,7 +167,7 @@ The principle is **organized ease**.
 
 ### Structure
 
-- Container: `max-w-7xl`
+- Container: `max-w-360`
 - Padding: `px-4 sm:px-6 lg:px-8`
 - Section spacing: `py-12` to `py-16`
 

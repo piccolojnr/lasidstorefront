@@ -1,164 +1,86 @@
 ---
 import Layout from "../layouts/layout.astro";
-import HeroSection from "../components/home/hero-section.astro";
-import BrandSection from "../components/home/brand-section.astro";
-import FeaturedCollectionsSection from "../components/home/featured-collections-section.astro";
+import HeroMosaicSection from "../components/home/hero-mosaic-section.astro";
+import CategoryTileGrid from "../components/home/category-tile-grid.astro";
 import ProductSection from "../components/home/product-section.astro";
-import TrustBenefitsSection from "../components/home/trust-benefits-section.astro";
+import PromoBanner from "../components/home/promo-banner.astro";
 import { catalogApi } from "../api/catalog";
+import { siteConfig } from "../lib/site-config";
 
-const [featuredResult, categoriesResult, collectionsResult, brandsResult] =
+const [latestResult, saleResult, popularResult, categoriesResult] =
   await Promise.allSettled([
-    catalogApi.getProducts({ featured: 1, sort: "latest" }),
-    catalogApi.getCategories({ root_only: true }),
-    catalogApi.getCollections(),
-    catalogApi.getBrands(),
+    catalogApi.getProducts({ sort: "latest" }),
+    catalogApi.getProducts({ on_sale: true, sort: "latest" }),
+    catalogApi.getProducts({
+      sort: "popular",
+      popularity_period: "7d",
+    }),
+    catalogApi.getCategories({ root_only: false }),
   ]);
 
-const featured =
-  featuredResult.status === "fulfilled" ? featuredResult.value.data : [];
-const cats =
+const latestProducts =
+  latestResult.status === "fulfilled"
+    ? latestResult.value.data.slice(0, 8)
+    : [];
+const saleProducts =
+  saleResult.status === "fulfilled" ? saleResult.value.data.slice(0, 8) : [];
+const popularProducts =
+  popularResult.status === "fulfilled"
+    ? popularResult.value.data.slice(0, 8)
+    : [];
+const categories =
   categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
-const collections =
-  collectionsResult.status === "fulfilled" ? collectionsResult.value : [];
-const brands = brandsResult.status === "fulfilled" ? brandsResult.value : [];
-const homepageCollections = collections.slice(0, 5);
-const collectionDetailResults = await Promise.allSettled(
-  homepageCollections.map((collection) =>
-    catalogApi.getCollection(collection.slug),
-  ),
-);
-const collectionDetails = collectionDetailResults
-  .filter((result) => result.status === "fulfilled")
-  .map((result) => result.value);
-
-const heroSlides = [
-  {
-    eyebrow: "#Big Fashion Sale",
-    title: "Limited Time Offer!",
-    description: "Up to 50% OFF on everyday fashion essentials.",
-    ctaHref: "/products",
-    ctaLabel: "Shop Now",
-    imageSrc: "/images/hero-1.jpg",
-    imageAlt: "Folded t-shirts and white sneakers on a pure white background",
-  },
-  {
-    eyebrow: "#Denim Picks",
-    title: "Everyday denim made simple.",
-    description: "Shop jeans and casual staples for clean everyday outfits.",
-    ctaHref: "/products?category=jeans",
-    ctaLabel: "Shop Denim",
-    imageSrc: "/images/hero-2.jpg",
-    imageAlt:
-      "Folded blue jeans with neutral t-shirts on a pure white background",
-  },
-  {
-    eyebrow: "#Footwear Deals",
-    title: "Step out in clean style.",
-    description: "Find sneakers and shoes that fit your everyday look.",
-    ctaHref: "/products?category=shoes",
-    ctaLabel: "Shop Shoes",
-    imageSrc: "/images/hero-3.jpg",
-    imageAlt:
-      "Clean white and neutral sneakers arranged on a pure white background",
-  },
-  {
-    eyebrow: "#Accessories",
-    title: "Finish the look.",
-    description:
-      "Complete your outfit with bags, watches, and simple accessories.",
-    ctaHref: "/products?category=accessories",
-    ctaLabel: "Shop Accessories",
-    imageSrc: "/images/hero-4.jpg",
-    imageAlt:
-      "Bag, wristwatch, and sunglasses arranged on a pure white background",
-  },
-  {
-    eyebrow: "#Shop The Look",
-    title: "Build your full outfit.",
-    description:
-      "Explore complete casual looks with shirts, jeans, shoes, and accessories.",
-    ctaHref: collections[0]
-      ? `/collections/${collections[0].slug}`
-      : "/collections",
-    ctaLabel: "View Collections",
-    imageSrc: "/images/hero-5.jpg",
-    imageAlt:
-      "Complete casual outfit arranged neatly on a pure white background",
-  },
-];
-
-const heroCategories = cats.slice(0, 8).map((cat) => ({
-  name: cat.name,
-  href: `/products?category=${cat.slug}`,
-}));
 ---
 
 <Layout
   title="Find what you need"
-  description="Everyday goods for everyday Ghanaians. Affordable fashion, lifestyle, books and more."
+  description="Everyday goods for everyday Ghanaians. Affordable fashion, electronics, home products, beauty and more."
 >
-  <HeroSection slides={heroSlides} categories={heroCategories} />
-
-  <FeaturedCollectionsSection
-    details={collectionDetails}
-    title="Shop by Collection"
+  <HeroMosaicSection
+    hero={siteConfig.homepage.hero}
+    sidePromos={siteConfig.homepage.sidePromos}
   />
 
-  <BrandSection brands={brands} />
+  <CategoryTileGrid categories={categories} />
 
   {
-    featured.length > 0 && (
+    latestProducts.length > 0 && (
       <ProductSection
-        eyebrow="Hand-picked"
-        title="Featured Products"
-        description="A simple selection of products worth starting with."
-        products={featured}
-        viewAllHref="/products?featured=1"
+        title="New Arrivals"
+        description="Freshly stocked this week."
+        products={latestProducts}
+        viewAllHref="/products?sort=latest"
       />
     )
   }
 
-  <TrustBenefitsSection />
+  {
+    saleProducts.length > 0 && (
+      <ProductSection
+        title="Flash Sales"
+        description="Good deals from products currently on sale."
+        products={saleProducts}
+        viewAllHref="/products?on_sale=true"
+      />
+    )
+  }
 
-  <!-- ── CTA ──────────────────────────────────────────────────────────────── -->
-  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
-    <div
-      class="relative overflow-hidden rounded-2xl bg-foreground px-8 py-12 sm:px-12 sm:py-14 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8"
-    >
-      <!-- Subtle radial glow for visual depth -->
-      <div class="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/[0.07] blur-3xl"></div>
+  <PromoBanner
+    eyebrow={siteConfig.homepage.banner.eyebrow}
+    title={siteConfig.homepage.banner.title}
+    ctaLabel={siteConfig.homepage.banner.ctaLabel}
+    href={siteConfig.homepage.banner.href}
+    imageSrc={siteConfig.homepage.banner.imageSrc}
+  />
 
-      <div class="relative">
-        <p
-          class="text-primary text-xs font-semibold tracking-[0.2em] uppercase mb-3 flex items-center gap-2"
-        >
-          <span class="block h-px w-5 bg-primary shrink-0"></span>
-          Join Backthred
-        </p>
-        <h2
-          class="font-heading text-background font-bold text-2xl sm:text-3xl leading-tight mb-2"
-        >
-          Start shopping in seconds.
-        </h2>
-        <p class="text-background/60 text-sm leading-relaxed max-w-sm">
-          Save addresses, track orders, and check out faster. Free to join.
-        </p>
-      </div>
-      <div class="relative flex flex-col sm:flex-row gap-3 shrink-0">
-        <a
-          href="/auth/login"
-          class="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-all text-center ring-2 ring-primary/20 ring-offset-2 ring-offset-foreground"
-        >
-          Create Account
-        </a>
-        <a
-          href="/products"
-          class="border border-background/20 hover:border-background/40 text-background/80 hover:text-background font-medium px-6 py-3 rounded-lg text-sm transition-colors text-center"
-        >
-          Browse First
-        </a>
-      </div>
-    </div>
-  </section>
+  {
+    popularProducts.length > 0 && (
+      <ProductSection
+        title="Popular This Week"
+        description="Fast-moving items across all departments."
+        products={popularProducts}
+        viewAllHref="/products?sort=popular&popularity_period=7d"
+      />
+    )
+  }
 </Layout>

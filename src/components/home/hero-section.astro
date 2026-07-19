@@ -31,7 +31,7 @@ const { slides, categories } = Astro.props;
 
     {
       categories.length > 0 && (
-        <div class="mx-auto mt-6 max-w-7xl pb-6">
+        <div class="mx-auto mt-6 max-w-360 pb-6">
           <CategoryStrip categories={categories} viewAllHref="/products" />
         </div>
       )
