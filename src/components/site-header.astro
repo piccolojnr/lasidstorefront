@@ -472,7 +472,7 @@ const isRouteActive = (href: string) =>
   const iconOpen = document.getElementById("icon-open");
   const iconClose = document.getElementById("icon-close");
 
-  const setMenuOpen = (open) => {
+  const setMenuOpen = (open: boolean) => {
     nav?.classList.toggle("hidden", !open);
     iconOpen?.classList.toggle("hidden", open);
     iconClose?.classList.toggle("hidden", !open);
