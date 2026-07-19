@@ -1,0 +1,37 @@
+# Dependencies (installed inside the image)
+node_modules/
+
+# Build output (produced inside the image)
+dist/
+
+# Environment files -- never bake secrets into the image
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.log
+
+# Astro dev artefacts
+.astro/
+.astro-dev.log
+.astro-dev.err.log
+
+# Vercel
+.vercel/
+
+# Agents / docs (not needed at runtime)
+.agents/
+.claude/
+*.md
+*.png
+*.jpeg
+*.jpg
+openapi.json

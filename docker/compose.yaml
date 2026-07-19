@@ -1,0 +1,25 @@
+name: backthredstorefront
+
+services:
+  storefront:
+    image: ${BACKTHRED_STOREFRONT_IMAGE:-ghcr.io/piccolojnr/backthred/storefront}:${BACKTHRED_STOREFRONT_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - ${BACKTHRED_STOREFRONT_COMPOSE_ENV_FILE:-.env}
+    environment:
+      # PUBLIC_* vars are baked at build time — API_BASE is the only runtime-injectable one
+      API_BASE: ${API_BASE:-https://api.example.com/api/v1}
+      HOST: "0.0.0.0"
+      PORT: "4321"
+    ports:
+      - "127.0.0.1:${APP_PORT:-4321}:4321"
+    networks:
+      - storefront
+      - backthred          # shared network so the storefront can reach the backend
+
+networks:
+  storefront:
+    driver: bridge
+  backthred:
+    external: true
+    name: backthred_backthred
