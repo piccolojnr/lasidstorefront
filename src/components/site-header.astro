@@ -95,27 +95,7 @@ const isRouteActive = (href: string) =>
 ---
 
 <div id="site-header-wrap" class="sticky top-0 z-40 bg-background">
-  <div class="bg-primary text-primary-foreground">
-    <div
-      class="mx-auto flex min-h-6 max-w-360 items-center justify-center px-4 py-1 text-[10px] sm:justify-between sm:px-6 lg:px-8"
-    >
-      <p class="truncate">
-        {siteConfig.topBar.message}
-      </p>
-
-      <div class="hidden items-center gap-5 md:flex">
-        <span>
-          {siteConfig.topBar.payment}
-        </span>
-
-        <span>
-          {siteConfig.topBar.support}
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <header class="border-b border-border bg-background/95 backdrop-blur-md">
+  <header class="bg-background/95 backdrop-blur-md border">
     <div class="mx-auto max-w-360 px-4 sm:px-6 lg:px-8">
       <!-- Mobile main row -->
       <div class="flex h-14 items-center justify-between md:hidden">
@@ -339,6 +319,22 @@ const isRouteActive = (href: string) =>
 
             <span>Cart</span>
           </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top bar -->
+    <div class="border-t border-border bg-primary text-primary-foreground">
+      <div
+        class="mx-auto flex min-h-6 max-w-360 items-center justify-center px-4 py-1 text-[10px] sm:justify-between sm:px-6 lg:px-8"
+      >
+        <p class="truncate">
+          {siteConfig.topBar.message}
+        </p>
+
+        <div class="hidden items-center gap-5 md:flex">
+          <span>{siteConfig.topBar.payment}</span>
+          <span>{siteConfig.topBar.support}</span>
         </div>
       </div>
     </div>
