@@ -97,6 +97,13 @@ export default function ProductPurchasePanel({
   const { label: stockLabel, color: stockColor, canAdd, isPreorder } =
     deriveStockState(stock, trackInventory, allowBackorders);
 
+  // Max quantity a user can request — only enforced when inventory is tracked
+  // and we have a real quantity number.
+  const maxQuantity =
+    trackInventory && stock && typeof stock.quantity === "number" && stock.quantity > 0
+      ? stock.quantity
+      : 99;
+
   const buttonLabel = !canAdd
     ? "Out of Stock"
     : isPreorder
@@ -211,8 +218,8 @@ export default function ProductPurchasePanel({
           </span>
           <button
             type="button"
-            onClick={() => setQuantity((q) => q + 1)}
-            disabled={!canAdd}
+            onClick={() => setQuantity((q) => Math.min(q + 1, maxQuantity))}
+            disabled={!canAdd || quantity >= maxQuantity}
             aria-label="Increase quantity"
             className="flex h-10 w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
           >
@@ -274,6 +281,12 @@ export default function ProductPurchasePanel({
 
       {addStatus === "error" && (
         <p className="text-sm text-destructive">{errorMsg}</p>
+      )}
+
+      {trackInventory && quantity >= maxQuantity && maxQuantity < 99 && (
+        <p className="text-xs text-warning">
+          Max available quantity: {maxQuantity}
+        </p>
       )}
 
       {/* ── Mobile sticky bar ──────────────────────────────────────── */}

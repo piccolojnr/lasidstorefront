@@ -44,6 +44,7 @@ function badgeClasses(badge: Badge) {
 const stock = product.stock ?? null;
 const isOutOfStock =
   stock?.status === "out_of_stock" && !stock.is_backorderable;
+const hasVariants = Array.isArray((product as any).variants) && (product as any).variants.length > 0;
 
 let stockLabel: string | null = null;
 let stockClasses = "text-muted-foreground";
@@ -71,8 +72,13 @@ if (stock) {
 ---
 
 <div
-  class="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+  class="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
 >
+  <!-- Wishlist button sits on top of the card, outside the anchor so clicks don't navigate -->
+  <div class="absolute right-2 top-2 z-10">
+    <WishlistButton productId={product.id} client:load />
+  </div>
+
   <a
     href={`/products/${product.slug}`}
     class="relative block aspect-square overflow-hidden bg-muted"
@@ -129,9 +135,6 @@ if (stock) {
       )
     }
 
-    <div class="absolute right-2 top-2">
-      <WishlistButton productId={product.id} client:load />
-    </div>
   </a>
 
   <div class="flex flex-1 flex-col p-3 sm:p-4">
@@ -168,6 +171,8 @@ if (stock) {
         <CardAddToCartButton
           client:load
           productId={product.id}
+          productSlug={product.slug}
+          hasVariants={hasVariants}
           disabled={isOutOfStock}
           label={buttonLabel}
         />
@@ -184,6 +189,8 @@ if (stock) {
       <CardAddToCartButton
         client:load
         productId={product.id}
+        productSlug={product.slug}
+        hasVariants={hasVariants}
         disabled={isOutOfStock}
         label={buttonLabel}
       />

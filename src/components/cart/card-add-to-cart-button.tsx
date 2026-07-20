@@ -8,18 +8,28 @@ import { Button } from "@/components/ui/button";
 
 interface Props {
   productId: number;
+  productSlug: string;
+  hasVariants: boolean;
   disabled?: boolean;
   label?: string;
 }
 
 export default function CardAddToCartButton({
   productId,
+  productSlug,
+  hasVariants,
   disabled = false,
   label = "Add to Cart",
 }: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  async function handleAddToCart() {
+  async function handleClick() {
+    // Products with variants require the user to pick one on the PDP first.
+    if (hasVariants) {
+      window.location.href = `/products/${productSlug}`;
+      return;
+    }
+
     if (disabled || status === "loading") return;
 
     setStatus("loading");
@@ -43,7 +53,7 @@ export default function CardAddToCartButton({
       size="default"
       className="h-9 w-9 px-0 sm:w-full sm:px-2.5 sm:text-sm"
       disabled={disabled || status === "loading"}
-      onClick={handleAddToCart}
+      onClick={handleClick}
       aria-label={disabled ? label : `${label} for product`}
     >
       <IconShoppingBagPlus className="sm:hidden" />
@@ -54,7 +64,9 @@ export default function CardAddToCartButton({
             ? "Added"
             : status === "error"
               ? "Try again"
-              : label}
+              : hasVariants
+                ? "Choose options"
+                : label}
       </span>
     </Button>
   );

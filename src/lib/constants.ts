@@ -21,6 +21,7 @@ export const ROUTES = {
   accountOrders: '/account/orders',
   accountAddresses: '/account/addresses',
   accountProfile: '/account',
+  accountWishlist: '/account/wishlist',
   // Customer care
   about: '/about',
   contact: '/contact',
