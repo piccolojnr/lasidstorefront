@@ -21,4 +21,13 @@ export const ROUTES = {
   accountOrders: '/account/orders',
   accountAddresses: '/account/addresses',
   accountProfile: '/account',
+  // Customer care
+  about: '/about',
+  contact: '/contact',
+  faqs: '/faqs',
+  shippingAndDelivery: '/shipping-and-delivery',
+  returnsAndExchanges: '/returns-and-exchanges',
+  // Legal
+  privacyPolicy: '/privacy-policy',
+  termsOfService: '/terms-of-service',
 } as const;

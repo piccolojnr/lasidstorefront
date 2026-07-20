@@ -1,0 +1,175 @@
+---
+import Layout from "../layouts/layout.astro";
+import { siteConfig } from "../lib/site-config";
+
+export const prerender = true;
+
+const faqs = [
+  {
+    category: "Orders & Payment",
+    items: [
+      {
+        q: "How do I place an order?",
+        a: "Browse our products, add items to your cart, and proceed to checkout. You'll be asked to provide your delivery address and choose a payment method. We accept MTN MoMo, Telecel Cash and AirtelTigo Money.",
+      },
+      {
+        q: "What payment methods do you accept?",
+        a: "We currently accept MTN Mobile Money (MoMo), Telecel Cash, and AirtelTigo Money. We do not require a credit or debit card — all payments are made via Mobile Money.",
+      },
+      {
+        q: "Can I change or cancel my order after placing it?",
+        a: "You can cancel or modify your order within 1 hour of placing it by contacting our support team on WhatsApp or by phone. Once an order is being processed for dispatch, changes may not be possible.",
+      },
+      {
+        q: "Will I receive a confirmation after ordering?",
+        a: "Yes. You'll receive an order confirmation on your account page immediately after checkout. We'll also send you updates as your order is processed and dispatched.",
+      },
+    ],
+  },
+  {
+    category: "Shipping & Delivery",
+    items: [
+      {
+        q: "Where do you deliver?",
+        a: "We currently deliver across Ghana with next-day delivery available in Accra, Kumasi, and Tema. Delivery to other regions typically takes 2–5 business days.",
+      },
+      {
+        q: "How much does delivery cost?",
+        a: "Delivery fees are calculated at checkout based on your location. Orders above GHC 250 in Accra and Kumasi qualify for free next-day delivery.",
+      },
+      {
+        q: "How do I track my order?",
+        a: "Log in to your account and visit the Orders section to see real-time status updates for your deliveries. You can also contact our support team for tracking assistance.",
+      },
+      {
+        q: "What happens if I'm not home at delivery time?",
+        a: "Our delivery team will attempt to contact you before delivery. If you're unavailable, they'll attempt delivery the next business day or you can arrange an alternative delivery time via WhatsApp.",
+      },
+    ],
+  },
+  {
+    category: "Returns & Exchanges",
+    items: [
+      {
+        q: "What is your return policy?",
+        a: "We accept returns within 7 days of delivery for items that are unused, in their original packaging, and in the same condition they were delivered. See our Returns & Exchanges page for full details.",
+      },
+      {
+        q: "How do I initiate a return?",
+        a: "Contact our customer support team via WhatsApp or email with your order number and reason for return. We'll guide you through the process and arrange a pickup where applicable.",
+      },
+      {
+        q: "Are there items that cannot be returned?",
+        a: "For hygiene and safety reasons, we cannot accept returns on underwear, swimwear, earrings, and opened beauty/skincare products unless they arrived damaged or defective.",
+      },
+      {
+        q: "When will I receive my refund?",
+        a: "Refunds are processed within 3–5 business days after we receive and inspect the returned item. Refunds are issued to the original Mobile Money number used for payment.",
+      },
+    ],
+  },
+  {
+    category: "Account & Profile",
+    items: [
+      {
+        q: "Do I need an account to shop?",
+        a: "Yes, an account is required to complete checkout. Creating one is free and only takes a minute — we use a magic link sent to your email, so no password is needed.",
+      },
+      {
+        q: "How do I reset my password?",
+        a: "We use magic link sign-in by default, so no password is required. If you use password login, you can reset it from the login page using the 'Forgot Password' link.",
+      },
+      {
+        q: "Can I save multiple delivery addresses?",
+        a: "Yes. You can manage multiple delivery addresses from your account settings under 'Addresses'.",
+      },
+    ],
+  },
+];
+---
+
+<Layout
+  title="FAQs"
+  description="Frequently asked questions about ordering, shipping, returns and your Backthred account."
+>
+  <div class="mx-auto max-w-360 px-4 py-16 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mx-auto max-w-2xl text-center">
+      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Frequently Asked Questions
+      </h1>
+      <p class="mt-4 text-lg text-muted-foreground leading-relaxed">
+        Find answers to common questions below. Can't find what you're looking
+        for?{" "}
+        <a href="/contact" class="text-primary underline underline-offset-4 hover:text-primary/80"
+          >Contact us</a
+        >.
+      </p>
+    </div>
+
+    <!-- FAQ sections -->
+    <div class="mx-auto mt-16 max-w-3xl flex flex-col gap-12">
+      {
+        faqs.map((section) => (
+          <div>
+            <h2 class="text-lg font-semibold text-foreground border-b border-border pb-3">
+              {section.category}
+            </h2>
+            <dl class="mt-4 flex flex-col gap-0 divide-y divide-border">
+              {section.items.map((item) => (
+                <details class="group py-4">
+                  <summary class="flex cursor-pointer items-start justify-between gap-4 text-sm font-medium text-foreground list-none">
+                    <span>{item.q}</span>
+                    <span class="mt-0.5 shrink-0 text-muted-foreground transition-transform group-open:rotate-45">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="size-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                    </span>
+                  </summary>
+                  <p class="mt-3 text-sm text-muted-foreground leading-relaxed pr-8">
+                    {item.a}
+                  </p>
+                </details>
+              ))}
+            </dl>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Bottom CTA -->
+    <div
+      class="mx-auto mt-16 max-w-3xl rounded-2xl bg-primary/5 border border-primary/10 px-8 py-10 text-center"
+    >
+      <h2 class="text-lg font-semibold text-foreground">Still have questions?</h2>
+      <p class="mt-2 text-sm text-muted-foreground">
+        Our support team is available Monday to Saturday, 8am–8pm.
+      </p>
+      <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href={siteConfig.contact.whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="rounded-lg bg-success px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-success/90"
+        >
+          Chat on WhatsApp
+        </a>
+        <a
+          href="/contact"
+          class="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+        >
+          All Contact Options
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

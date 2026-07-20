@@ -70,12 +70,16 @@ export const siteConfig = {
       { href: '/products?on_sale=true', label: 'Flash Sales' },
     ],
     careLinks: [
-      { href: '/account', label: 'Contact Us' },
+      { href: '/contact', label: 'Contact Us' },
       { href: '/account/orders', label: 'Track Your Order' },
-      { href: '/checkout', label: 'Shipping & Delivery' },
-      { href: '/account/orders', label: 'Returns & Exchanges' },
-      { href: '/checkout', label: 'MoMo Payment Info' },
-      { href: '/account', label: 'FAQs' },
+      { href: '/shipping-and-delivery', label: 'Shipping & Delivery' },
+      { href: '/returns-and-exchanges', label: 'Returns & Exchanges' },
+      { href: '/faqs', label: 'FAQs' },
+      { href: '/about', label: 'About Us' },
+    ],
+    legalLinks: [
+      { href: '/privacy-policy', label: 'Privacy Policy' },
+      { href: '/terms-of-service', label: 'Terms of Service' },
     ],
   },
 };

@@ -8,63 +8,53 @@
 
 /* ── Light theme ─────────────────────────────────────────────────────────── */
 :root {
-    /* Clean neutral backgrounds */
     --background:          #FFFFFF;
     --foreground:          #111827;
 
-    /* Cards and surfaces */
     --card:                #F9FAFB;
     --card-foreground:     #111827;
 
-    /* Popovers */
     --popover:             #FFFFFF;
     --popover-foreground:  #111827;
 
-    /* Primary action blue */
-    --primary:             #2563EB;
-    --primary-foreground:  #FFFFFF;
+    /* Brand green from the logo */
+  --primary:             #90D8A8;
+    --primary-foreground:  #102116;
 
-    /* Secondary neutrals */
-    --secondary:           #F9FAFB;
-    --secondary-foreground:#111827;
+   --secondary:           #EAF7EE;
+    --secondary-foreground:#245C37;
 
-    /* Muted text and surfaces */
     --muted:               #F9FAFB;
     --muted-foreground:    #6B7280;
 
-    /* Accent states */
-    --accent:              #DBEAFE;
-    --accent-foreground:   #1D4ED8;
+    /* Soft brand-green states */
+   --accent:              #D8F0E0;
+    --accent-foreground:   #1F5A35;
 
-    /* Destructive */
     --destructive:         #EF4444;
     --warning:             #F59E0B;
     --success:             #16A34A;
 
-    /* Borders and inputs */
     --border:              #E5E7EB;
     --input:               #E5E7EB;
-    --ring:                #1D4ED8;
+    --ring:                #58B879;
 
-    /* Charts */
-    --chart-1:             #2563EB;
-    --chart-2:             #16A34A;
+    --chart-1:             #8ED4A2;
+    --chart-2:             #2563EB;
     --chart-3:             #F59E0B;
-    --chart-4:             #6B7280;
+    --chart-4:             #8B5CF6;
     --chart-5:             #111827;
 
-    /* Radius — slightly generous for warmth */
     --radius: 0.5rem;
 
-    /* Sidebar */
     --sidebar:                    #F9FAFB;
     --sidebar-foreground:         #111827;
-    --sidebar-primary:            #2563EB;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent:             #DBEAFE;
-    --sidebar-accent-foreground:  #1D4ED8;
+    --sidebar-primary:            #8ED4A2;
+    --sidebar-primary-foreground: #0B1710;
+    --sidebar-accent:             #E2F5E8;
+    --sidebar-accent-foreground:  #205D36;
     --sidebar-border:             #E5E7EB;
-    --sidebar-ring:               #1D4ED8;
+    --sidebar-ring:               #58B878;
 }
 
 /* ── Dark theme ──────────────────────────────────────────────────────────── */
@@ -78,9 +68,9 @@
     --popover:             #1F2937;
     --popover-foreground:  #F9FAFB;
 
-    /* Primary remains action blue in dark mode */
-    --primary:             #60A5FA;
-    --primary-foreground:  #111827;
+    /* Keep the exact logo green */
+    --primary:             #8ED4A2;
+    --primary-foreground:  #08110C;
 
     --secondary:           #1F2937;
     --secondary-foreground:#F9FAFB;
@@ -88,8 +78,8 @@
     --muted:               #1F2937;
     --muted-foreground:    #9CA3AF;
 
-    --accent:              #1E3A8A;
-    --accent-foreground:   #DBEAFE;
+    --accent:              #193A26;
+    --accent-foreground:   #D5F4DE;
 
     --destructive:         #F87171;
     --warning:             #FBBF24;
@@ -97,22 +87,22 @@
 
     --border:              #374151;
     --input:               #374151;
-    --ring:                #60A5FA;
+    --ring:                #8ED4A2;
 
-    --chart-1:             #60A5FA;
-    --chart-2:             #4ADE80;
+    --chart-1:             #8ED4A2;
+    --chart-2:             #60A5FA;
     --chart-3:             #FBBF24;
-    --chart-4:             #9CA3AF;
+    --chart-4:             #C4B5FD;
     --chart-5:             #F9FAFB;
 
     --sidebar:                    #1F2937;
     --sidebar-foreground:         #F9FAFB;
-    --sidebar-primary:            #60A5FA;
-    --sidebar-primary-foreground: #111827;
-    --sidebar-accent:             #1E3A8A;
-    --sidebar-accent-foreground:  #DBEAFE;
+    --sidebar-primary:            #8ED4A2;
+    --sidebar-primary-foreground: #08110C;
+    --sidebar-accent:             #193A26;
+    --sidebar-accent-foreground:  #D5F4DE;
     --sidebar-border:             #374151;
-    --sidebar-ring:               #60A5FA;
+    --sidebar-ring:               #8ED4A2;
 }
 
 /* ── Theme mappings ──────────────────────────────────────────────────────── */

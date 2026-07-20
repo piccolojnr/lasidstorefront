@@ -1,0 +1,198 @@
+---
+import Layout from "../layouts/layout.astro";
+import { siteConfig } from "../lib/site-config";
+
+export const prerender = true;
+---
+
+<Layout
+  title="Returns & Exchanges"
+  description="Backthred's 7-day return and exchange policy. Learn how to return an item or request an exchange."
+>
+  <div class="mx-auto max-w-360 px-4 py-16 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mx-auto max-w-2xl text-center">
+      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Returns & Exchanges
+      </h1>
+      <p class="mt-4 text-lg text-muted-foreground leading-relaxed">
+        Not quite right? We make returns and exchanges simple. You have 7 days
+        from delivery to request one.
+      </p>
+    </div>
+
+    <div class="mx-auto mt-16 max-w-3xl flex flex-col gap-10">
+      <!-- Summary cards -->
+      <div class="grid gap-4 sm:grid-cols-3">
+        {
+          [
+            {
+              title: "7-Day Window",
+              detail: "Submit your return or exchange request within 7 days of receiving your order.",
+            },
+            {
+              title: "Unused Condition",
+              detail: "Items must be unused, unwashed and in their original packaging.",
+            },
+            {
+              title: "MoMo Refund",
+              detail: "Approved refunds are sent back to your original Mobile Money number within 3–5 days.",
+            },
+          ].map((card) => (
+            <div class="rounded-xl border border-border bg-card p-5 text-center">
+              <p class="font-semibold text-foreground">{card.title}</p>
+              <p class="mt-2 text-xs text-muted-foreground leading-relaxed">{card.detail}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- Eligibility -->
+      <section class="rounded-xl border border-border bg-card p-8">
+        <h2 class="text-lg font-semibold text-foreground">Return Eligibility</h2>
+        <p class="mt-2 text-sm text-muted-foreground">
+          To be eligible for a return or exchange, the following conditions must
+          be met:
+        </p>
+        <ul class="mt-5 flex flex-col gap-3 text-sm text-muted-foreground">
+          {
+            [
+              "Return request submitted within 7 days of delivery.",
+              "Item is unused, unwashed and unaltered.",
+              "Item is in its original packaging with all tags attached.",
+              "You have proof of purchase (order number from your account).",
+            ].map((point) => (
+              <li class="flex items-start gap-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="mt-0.5 size-4 shrink-0 text-success"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                <span>{point}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <!-- Non-returnable items -->
+      <section class="rounded-xl border border-border bg-card p-8">
+        <h2 class="text-lg font-semibold text-foreground">Non-Returnable Items</h2>
+        <p class="mt-2 text-sm text-muted-foreground">
+          For hygiene and safety reasons, the following items cannot be returned
+          unless they arrived damaged or defective:
+        </p>
+        <ul class="mt-5 flex flex-col gap-3 text-sm text-muted-foreground">
+          {
+            [
+              "Underwear and swimwear",
+              "Earrings and pierced jewellery",
+              "Opened beauty, skincare and personal care products",
+              "Perishable or consumable goods",
+              "Customised or personalised items",
+            ].map((item) => (
+              <li class="flex items-start gap-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="mt-0.5 size-4 shrink-0 text-destructive"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <!-- How to return -->
+      <section class="rounded-xl border border-border bg-card p-8">
+        <h2 class="text-lg font-semibold text-foreground">How to Request a Return or Exchange</h2>
+        <ol class="mt-6 flex flex-col gap-5">
+          {
+            [
+              {
+                step: "1",
+                title: "Contact Support",
+                detail:
+                  "Reach out via WhatsApp or email within 7 days of receiving your order. Include your order number and the reason for the return or exchange.",
+              },
+              {
+                step: "2",
+                title: "Get Approval",
+                detail:
+                  "Our team will review your request and respond within 1 business day. We may ask for photos of the item.",
+              },
+              {
+                step: "3",
+                title: "Return the Item",
+                detail:
+                  "Once approved, we'll arrange a pickup or provide drop-off instructions. Pack the item securely in its original packaging.",
+              },
+              {
+                step: "4",
+                title: "Receive Refund or Exchange",
+                detail:
+                  "After we inspect the returned item, your refund will be processed to your original MoMo number within 3–5 business days, or your exchange order will be dispatched.",
+              },
+            ].map((s) => (
+              <li class="flex gap-4">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {s.step}
+                </span>
+                <div>
+                  <p class="font-medium text-foreground">{s.title}</p>
+                  <p class="mt-1 text-sm text-muted-foreground leading-relaxed">{s.detail}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <!-- Damaged / wrong items -->
+      <section class="rounded-xl border border-border bg-card p-8">
+        <h2 class="text-lg font-semibold text-foreground">
+          Received a Damaged or Wrong Item?
+        </h2>
+        <p class="mt-3 text-sm text-muted-foreground leading-relaxed">
+          If your order arrived damaged, defective, or was the wrong item, please
+          contact us within 48 hours of delivery. We'll arrange a replacement or
+          full refund at no cost to you — including return delivery.
+        </p>
+        <a
+          href={siteConfig.contact.whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-5 inline-flex items-center rounded-lg bg-success px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-success/90"
+        >
+          Report an Issue on WhatsApp
+        </a>
+      </section>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="mx-auto mt-12 max-w-3xl text-center">
+      <p class="text-sm text-muted-foreground">
+        Questions about a return?{" "}
+        <a href="/contact" class="text-primary underline underline-offset-4 hover:text-primary/80">
+          Contact our support team
+        </a>
+        — we're available Monday to Saturday, 8am–8pm.
+      </p>
+    </div>
+  </div>
+</Layout>

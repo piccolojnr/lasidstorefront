@@ -1,0 +1,208 @@
+---
+import Layout from "../layouts/layout.astro";
+import { siteConfig } from "../lib/site-config";
+
+export const prerender = true;
+---
+
+<Layout
+  title="Shipping & Delivery"
+  description="Learn about Backthred's delivery areas, timelines, and shipping fees across Ghana."
+>
+  <div class="mx-auto max-w-360 px-4 py-16 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mx-auto max-w-2xl text-center">
+      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Shipping & Delivery
+      </h1>
+      <p class="mt-4 text-lg text-muted-foreground leading-relaxed">
+        We deliver across Ghana. Here's everything you need to know about our
+        delivery options and timelines.
+      </p>
+    </div>
+
+    <div class="mx-auto mt-16 max-w-3xl flex flex-col gap-10">
+      <!-- Delivery areas -->
+      <section class="rounded-xl border border-border bg-card p-8">
+        <h2 class="text-lg font-semibold text-foreground">Delivery Areas</h2>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+          {
+            [
+              {
+                area: "Accra, Kumasi & Tema",
+                timeline: "Next-day delivery",
+                badge: "Fastest",
+                detail:
+                  "Orders placed before 3pm are eligible for next-day delivery in these cities.",
+              },
+              {
+                area: "Other Regions",
+                timeline: "2–5 business days",
+                badge: null,
+                detail:
+                  "We deliver to all regions in Ghana. Timelines vary by location and carrier availability.",
+              },
+            ].map((zone) => (
+              <div class="rounded-lg border border-border p-5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-medium text-foreground text-sm">{zone.area}</span>
+                  {zone.badge && (
+                    <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                      {zone.badge}
+                    </span>
+                  )}
+                </div>
+                <p class="mt-1 text-sm font-semibold text-foreground">{zone.timeline}</p>
+                <p class="mt-2 text-xs text-muted-foreground leading-relaxed">{zone.detail}</p>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Shipping fees -->
+      <section class="rounded-xl border border-border bg-card p-8">
+        <h2 class="text-lg font-semibold text-foreground">Shipping Fees</h2>
+        <p class="mt-2 text-sm text-muted-foreground">
+          Delivery fees are calculated at checkout based on your location and
+          order total.
+        </p>
+        <div class="mt-6 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-border">
+                <th class="pb-3 text-left font-semibold text-foreground">Location</th>
+                <th class="pb-3 text-left font-semibold text-foreground">Standard Fee</th>
+                <th class="pb-3 text-left font-semibold text-foreground">Free Delivery Threshold</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              {
+                [
+                  {
+                    location: "Accra",
+                    fee: "GHC 15–25",
+                    free: "Orders above GHC 250",
+                  },
+                  {
+                    location: "Kumasi",
+                    fee: "GHC 15–25",
+                    free: "Orders above GHC 250",
+                  },
+                  {
+                    location: "Tema",
+                    fee: "GHC 20–30",
+                    free: "Orders above GHC 250",
+                  },
+                  {
+                    location: "Other Regions",
+                    fee: "GHC 30–60",
+                    free: "Not available",
+                  },
+                ].map((row) => (
+                  <tr>
+                    <td class="py-3 text-muted-foreground">{row.location}</td>
+                    <td class="py-3 text-foreground">{row.fee}</td>
+                    <td class="py-3 text-muted-foreground">{row.free}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-4 text-xs text-muted-foreground">
+          * Fees are estimates. Your exact delivery fee will be shown at checkout.
+        </p>
+      </section>
+
+      <!-- How it works -->
+      <section class="rounded-xl border border-border bg-card p-8">
+        <h2 class="text-lg font-semibold text-foreground">How Delivery Works</h2>
+        <ol class="mt-6 flex flex-col gap-5">
+          {
+            [
+              {
+                step: "1",
+                title: "Place Your Order",
+                detail:
+                  "Add items to your cart and complete checkout. Orders placed before 3pm on business days qualify for next-day delivery in Accra, Kumasi and Tema.",
+              },
+              {
+                step: "2",
+                title: "Order Processing",
+                detail:
+                  "We verify payment and begin preparing your order. You'll receive a status update in your account.",
+              },
+              {
+                step: "3",
+                title: "Dispatched for Delivery",
+                detail:
+                  "Your order is handed to our delivery team. You can track status in your account under Orders.",
+              },
+              {
+                step: "4",
+                title: "Delivered to You",
+                detail:
+                  "Our delivery agent will contact you before arrival. Ensure your number and address are correct at checkout.",
+              },
+            ].map((s) => (
+              <li class="flex gap-4">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {s.step}
+                </span>
+                <div>
+                  <p class="font-medium text-foreground">{s.title}</p>
+                  <p class="mt-1 text-sm text-muted-foreground leading-relaxed">{s.detail}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <!-- Notes -->
+      <section class="rounded-xl border border-border bg-card p-8">
+        <h2 class="text-lg font-semibold text-foreground">Important Notes</h2>
+        <ul class="mt-4 flex flex-col gap-3 text-sm text-muted-foreground">
+          <li class="flex items-start gap-2">
+            <span class="mt-1 size-1.5 shrink-0 rounded-full bg-muted-foreground"></span>
+            Delivery timelines are estimates and may be affected by public
+            holidays, weather, or high-demand periods.
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="mt-1 size-1.5 shrink-0 rounded-full bg-muted-foreground"></span>
+            We currently do not offer same-day delivery.
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="mt-1 size-1.5 shrink-0 rounded-full bg-muted-foreground"></span>
+            If a delivery attempt fails, our team will contact you to reschedule.
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="mt-1 size-1.5 shrink-0 rounded-full bg-muted-foreground"></span>
+            Ensure your delivery address and phone number are accurate at
+            checkout to avoid delays.
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="mx-auto mt-12 max-w-3xl text-center">
+      <p class="text-sm text-muted-foreground">
+        Have a delivery question?{" "}
+        <a href="/contact" class="text-primary underline underline-offset-4 hover:text-primary/80">
+          Contact our support team
+        </a>
+        or chat with us on WhatsApp at{" "}
+        <a
+          href={siteConfig.contact.whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary underline underline-offset-4 hover:text-primary/80"
+        >
+          {siteConfig.contact.phone}
+        </a>.
+      </p>
+    </div>
+  </div>
+</Layout>
