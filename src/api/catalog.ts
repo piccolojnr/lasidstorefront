@@ -58,17 +58,44 @@ export interface ProductImage {
   is_primary: boolean;
 }
 
+export interface ProductVariantOptionValue {
+  id: number;
+  value: string;
+  option_type_id: number;
+  option_type_name: string;
+}
+
+export interface ProductOptionValue {
+  id: number;
+  value: string;
+}
+
+export interface ProductOptionType {
+  id: number;
+  name: string;
+  values: ProductOptionValue[];
+}
+
+export interface ProductVariantStock {
+  quantity: number | null;
+  status: string;
+  is_backorderable: boolean;
+}
+
 export interface ProductVariant {
   id: number;
   name: string;
   sku: string;
-  price: number;
+  price: number | null;
   compare_at_price: number | null;
   is_active: boolean;
+  option_value_ids: number[];
+  option_values: ProductVariantOptionValue[];
+  stock: ProductVariantStock;
 }
 
 export interface ProductStock {
-  quantity: number;
+  quantity: number | null;
   status: string;
   is_backorderable: boolean;
 }
@@ -84,6 +111,8 @@ export interface ProductSummary {
   discount_amount?: number | null;
   discount_percentage?: number | null;
   is_featured: boolean;
+  has_variants: boolean;
+  variants_count: number;
   badges: Badge[];
   primary_image_url: string | null;
   primary_image_thumb_url: string | null;
@@ -106,6 +135,7 @@ export interface ProductDetail extends ProductSummary {
   images: ProductImage[];
   category: (Pick<Category, 'id' | 'name' | 'slug'> & { image_url?: string }) | null;
   brand: (Pick<Brand, 'id' | 'name' | 'slug'> & { image_url?: string }) | null;
+  option_types: ProductOptionType[];
   variants: ProductVariant[];
   related_products: ProductSummary[];
 }

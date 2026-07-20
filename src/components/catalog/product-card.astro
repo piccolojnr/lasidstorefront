@@ -44,7 +44,7 @@ function badgeClasses(badge: Badge) {
 const stock = product.stock ?? null;
 const isOutOfStock =
   stock?.status === "out_of_stock" && !stock.is_backorderable;
-const hasVariants = Array.isArray((product as any).variants) && (product as any).variants.length > 0;
+const hasVariants = product.has_variants === true;
 
 let stockLabel: string | null = null;
 let stockClasses = "text-muted-foreground";

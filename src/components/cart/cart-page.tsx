@@ -86,7 +86,20 @@ export default function CartPage() {
 
               <div className="flex flex-1 flex-col gap-1">
                 <p className="text-foreground text-sm font-medium leading-snug">{item.product_name_snapshot}</p>
-                {item.variant_name_snapshot && <p className="text-muted-foreground text-xs">{item.variant_name_snapshot}</p>}
+                {/* Structured option chips — preferred over variant_name_snapshot */}
+                {item.option_values && item.option_values.length > 0 ? (
+                  <p className="text-muted-foreground text-xs">
+                    {item.option_values.map((ov, i) => (
+                      <span key={ov.id}>
+                        {i > 0 && <span className="mx-1 opacity-40">·</span>}
+                        <span className="font-medium text-foreground/70">{ov.option_type_name}:</span>{' '}
+                        {ov.value}
+                      </span>
+                    ))}
+                  </p>
+                ) : item.variant_name_snapshot ? (
+                  <p className="text-muted-foreground text-xs">{item.variant_name_snapshot}</p>
+                ) : null}
                 <p className="text-muted-foreground text-xs">SKU: {item.sku_snapshot}</p>
 
                 <div className="mt-auto flex items-center justify-between pt-2">

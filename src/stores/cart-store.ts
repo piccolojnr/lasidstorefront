@@ -2,6 +2,13 @@ import { persistentAtom } from '@nanostores/persistent';
 import { atom } from 'nanostores';
 import { CART_TOKEN_KEY } from '../lib/constants';
 
+export interface CartItemOptionValue {
+  id: number;
+  value: string;
+  option_type_id: number;
+  option_type_name: string;
+}
+
 export interface CartItem {
   id: number;
   product_id: number;
@@ -16,6 +23,7 @@ export interface CartItem {
   unit_price: number;
   quantity: number;
   line_total: number;
+  option_values: CartItemOptionValue[] | null;
 }
 
 export interface Cart {

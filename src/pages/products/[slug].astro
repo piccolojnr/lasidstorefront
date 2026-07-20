@@ -167,8 +167,10 @@ const hasRelated = product.related_products.length > 0;
           )
         }
 
-        <!-- SKU -->
-        <p class="text-xs text-muted-foreground">SKU: {product.sku}</p>
+        {/* SKU shown here only for simple products; variant SKU is shown inside the purchase panel */}
+        {!product.has_variants && (
+          <p class="text-xs text-muted-foreground">SKU: {product.sku}</p>
+        )}
 
         <!-- Purchase panel island (price + stock + variants + qty + add-to-cart + mobile sticky) -->
         <ProductPurchasePanel
@@ -179,6 +181,8 @@ const hasRelated = product.related_products.length > 0;
           stock={product.stock ?? null}
           trackInventory={product.track_inventory}
           allowBackorders={product.allow_backorders}
+          hasVariants={product.has_variants}
+          optionTypes={product.option_types ?? []}
           variants={product.variants}
         />
 
