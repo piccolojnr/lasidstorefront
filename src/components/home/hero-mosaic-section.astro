@@ -44,9 +44,10 @@ const { hero, sidePromos } = Astro.props;
     <!-- Main hero -->
     <div
       class="group relative
-        min-h-[calc(100svh-var(--site-header-height)-1.5rem)]
+        min-h-72
         overflow-hidden rounded-2xl bg-foreground
-        sm:min-h-[34rem]
+        sm:min-h-[28rem]
+        md:min-h-[34rem]
         lg:h-full lg:min-h-0
         lg:rounded-3xl"
     >
@@ -76,26 +77,26 @@ const { hero, sidePromos } = Astro.props;
 
       <div
         class="relative flex h-full max-w-4xl flex-col justify-end
-          p-6
+          p-5
           sm:p-9
           lg:p-12
           xl:p-14"
       >
         <p
-          class="mb-4 w-fit rounded-full
-            bg-primary px-3.5 py-1.5
-            text-[11px] font-semibold tracking-wide
+          class="mb-3 w-fit rounded-full
+            bg-primary px-3 py-1
+            text-[10px] font-semibold tracking-wide
             text-primary-foreground
-            sm:text-xs"
+            sm:mb-4 sm:px-3.5 sm:py-1.5 sm:text-xs"
         >
           {hero.eyebrow}
         </p>
 
         <h1
           class="max-w-3xl font-heading
-            text-4xl font-bold leading-[1.04] tracking-tight
+            text-2xl font-bold leading-[1.08] tracking-tight
             text-white
-            sm:text-5xl
+            sm:text-4xl sm:leading-[1.04]
             lg:text-6xl
             xl:text-360"
         >
@@ -103,33 +104,36 @@ const { hero, sidePromos } = Astro.props;
         </h1>
 
         <p
-          class="mt-4 max-w-2xl
-            text-base leading-7 text-white/80
-            sm:text-lg sm:leading-8"
+          class="mt-2.5 max-w-2xl
+            text-sm leading-6 text-white/80
+            sm:mt-4 sm:text-base sm:leading-7
+            lg:text-lg lg:leading-8"
         >
           {hero.description}
         </p>
 
-        <div class="mt-7 flex flex-wrap gap-3">
+        <div class="mt-5 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
           <a
             href={hero.primaryHref}
-            class="inline-flex min-h-12 items-center justify-center
-              rounded-xl bg-primary px-6
+            class="inline-flex min-h-10 items-center justify-center
+              rounded-xl bg-primary px-5
               text-sm font-semibold text-primary-foreground
-              transition-colors hover:bg-primary/90"
+              transition-colors hover:bg-primary/90
+              sm:min-h-12 sm:px-6"
           >
             {hero.primaryCta}
           </a>
 
           <a
             href={hero.secondaryHref}
-            class="inline-flex min-h-12 items-center justify-center
+            class="inline-flex min-h-10 items-center justify-center
               rounded-xl border border-white/25
-              bg-white/10 px-6
+              bg-white/10 px-5
               text-sm font-semibold text-white
               backdrop-blur-sm
               transition-colors
-              hover:bg-white/18"
+              hover:bg-white/18
+              sm:min-h-12 sm:px-6"
           >
             {hero.secondaryCta}
           </a>
@@ -139,8 +143,8 @@ const { hero, sidePromos } = Astro.props;
 
     <!-- Side promotions -->
     <div
-      class="grid gap-3
-        sm:grid-cols-3 sm:gap-4
+      class="grid grid-cols-3 gap-3
+        sm:gap-4
         lg:h-full lg:grid-cols-1 lg:grid-rows-3"
     >
       {
@@ -149,9 +153,9 @@ const { hero, sidePromos } = Astro.props;
             href={promo.href}
             class="
               group relative
-              min-h-52 overflow-hidden rounded-2xl
+              min-h-28 overflow-hidden rounded-2xl
               bg-foreground
-              sm:min-h-48
+              sm:min-h-44
               lg:min-h-0
               lg:rounded-3xl
             "
@@ -180,14 +184,16 @@ const { hero, sidePromos } = Astro.props;
             <div
               class="
                 relative flex h-full flex-col justify-end
-                p-5
+                p-3
+                sm:p-5
                 lg:p-6
               "
             >
               <h2
                 class="
-                  font-heading text-lg font-bold leading-tight
+                  font-heading text-xs font-bold leading-tight
                   text-white
+                  sm:text-lg
                   lg:text-xl
                 "
               >
@@ -196,8 +202,9 @@ const { hero, sidePromos } = Astro.props;
 
               <p
                 class="
-                  mt-1.5 text-sm leading-5
+                  mt-0.5 hidden text-[10px] leading-4
                   text-white/75
+                  sm:mt-1.5 sm:block sm:text-sm sm:leading-5
                 "
               >
                 {promo.text}

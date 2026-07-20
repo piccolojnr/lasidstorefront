@@ -145,19 +145,19 @@ if (stock) {
 
     <a
       href={`/products/${product.slug}`}
-      class="mt-1 line-clamp-2 text-[13px] font-medium leading-5 text-foreground transition-colors hover:text-foreground/80 sm:text-sm"
+      class="line-clamp-2 text-[13px] font-medium leading-5 text-foreground transition-colors hover:text-foreground/80 sm:mt-1 sm:text-sm"
     >
       {product.name}
     </a>
 
-    <div class="mt-2 flex items-start justify-between gap-2 sm:mt-3 sm:block">
-      <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+    <div class="mt-2 flex items-center justify-between gap-2 sm:mt-3 sm:block">
+      <div class="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-1">
         <span class="text-sm font-bold text-foreground sm:text-base">
           {formatMoney(product.base_price)}
         </span>
         {
           hasCompareAtPrice && (
-            <span class="text-xs text-muted-foreground line-through sm:text-sm">
+            <span class="truncate text-xs text-muted-foreground line-through sm:text-sm">
               {formatMoney(product.compare_at_price!)}
             </span>
           )
@@ -174,15 +174,13 @@ if (stock) {
       </div>
     </div>
 
-    <div class:list={["mt-1.5 sm:mt-2", stockLabel ? "min-h-6" : ""]}>
-      {
-        stockLabel && (
-          <p class:list={["text-xs font-medium", stockClasses]}>{stockLabel}</p>
-        )
-      }
-    </div>
+    {
+      stockLabel && (
+        <p class:list={["mt-1 text-xs font-medium", stockClasses]}>{stockLabel}</p>
+      )
+    }
 
-    <div class="hidden sm:block">
+    <div class="mt-2 hidden sm:block">
       <CardAddToCartButton
         client:load
         productId={product.id}

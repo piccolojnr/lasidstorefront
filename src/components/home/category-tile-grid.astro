@@ -14,12 +14,12 @@ const visibleCategories = categories.slice(0, 5);
   visibleCategories.length > 0 && (
     <section class="bg-background py-8 sm:py-10">
       <div class="mx-auto max-w-360 px-4 sm:px-6 lg:px-8">
-        <div class="mb-5 flex items-end justify-between gap-4">
+        <div class="mb-4 flex items-center justify-between gap-3 sm:mb-5 sm:items-end sm:gap-4">
           <div>
-            <h2 class="font-heading text-2xl font-bold text-foreground">
+            <h2 class="font-heading text-xl font-bold text-foreground sm:text-2xl">
               Browse Categories
             </h2>
-            <p class="mt-1 text-sm text-muted-foreground">
+            <p class="mt-0.5 text-xs text-muted-foreground sm:mt-1 sm:text-sm">
               Find what you need, updated with fresh stock regularly.
             </p>
           </div>
@@ -31,16 +31,17 @@ const visibleCategories = categories.slice(0, 5);
           </a>
         </div>
 
-        <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
           {visibleCategories.map((category, index) => {
             const isFeature = index === 0;
             return (
               <a
                 href={`/products?category=${category.slug}`}
                 class:list={[
-                  "group relative min-h-34 overflow-hidden rounded-xl bg-foreground",
-                  isFeature &&
-                    "md:col-span-1 lg:col-span-2 lg:row-span-2 lg:min-h-60",
+                  "group relative overflow-hidden rounded-xl bg-foreground",
+                  isFeature
+                    ? "col-span-2 min-h-44 lg:row-span-2 lg:min-h-60"
+                    : "min-h-32 sm:min-h-34",
                 ]}
               >
                 {category.image_url ? (
@@ -53,16 +54,16 @@ const visibleCategories = categories.slice(0, 5);
                   />
                 ) : null}
                 <div class="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                <div class="relative flex h-full flex-col justify-end p-4 sm:p-5">
+                  <div class="relative flex h-full flex-col justify-end p-3 sm:p-5">
                   <h3
                     class:list={[
                       "font-bold text-white",
-                      isFeature ? "text-lg" : "text-sm",
+                      isFeature ? "text-base sm:text-lg" : "text-xs sm:text-sm",
                     ]}
                   >
                     {category.name}
                   </h3>
-                  <p class="mt-0.5 text-xs text-white/70">Fresh stock & more</p>
+                  <p class="mt-0.5 text-[11px] text-white/70 sm:text-xs">Fresh stock & more</p>
                 </div>
               </a>
             );
