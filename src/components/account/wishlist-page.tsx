@@ -2,34 +2,24 @@
 
 import * as React from "react";
 import { useStore } from "@nanostores/react";
-import { IconHeart, IconHeartFilled, IconShoppingBagPlus, IconTrash } from "@tabler/icons-react";
+import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 
 import { wishlistStore, toggleWishlist } from "@/stores/wishlist-store";
 import { catalogApi, type ProductSummary } from "@/api/catalog";
-import { cartApi } from "@/api/cart";
+import CardAddToCartButton from "@/components/cart/card-add-to-cart-button";
 import { formatMoney } from "@/lib/money";
-import { cn } from "@/lib/utils";
 
 function WishlistItem({ product }: { product: ProductSummary }) {
-  const [cartStatus, setCartStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const imageSrc = product.primary_image_card_url ?? product.primary_image_url;
-  const hasVariants = false; // ProductSummary doesn't expose variants; redirect to PDP if needed
+  const hasVariants = product.has_variants === true;
   const stock = product.stock ?? null;
   const isOutOfStock = stock?.status === "out_of_stock" && !stock.is_backorderable;
-
-  async function handleAddToCart(e: React.MouseEvent) {
-    e.preventDefault();
-    if (isOutOfStock || cartStatus === "loading") return;
-    setCartStatus("loading");
-    try {
-      await cartApi.addItem({ product_id: product.id, quantity: 1 });
-      setCartStatus("success");
-      setTimeout(() => setCartStatus("idle"), 2000);
-    } catch {
-      setCartStatus("error");
-      setTimeout(() => setCartStatus("idle"), 2500);
-    }
-  }
+  const isBackorder = stock?.status === "out_of_stock" && stock.is_backorderable;
+  const buttonLabel = isOutOfStock
+    ? "Out of Stock"
+    : isBackorder
+      ? "Pre-order"
+      : "Add to Cart";
 
   function handleRemove(e: React.MouseEvent) {
     e.preventDefault();
@@ -97,47 +87,28 @@ function WishlistItem({ product }: { product: ProductSummary }) {
             )}
           </div>
 
-          {/* Mobile: icon button */}
+          {/* Mobile: icon button — navigates to the PDP when variants must be picked */}
           <div className="shrink-0 sm:hidden">
-            <button
-              type="button"
-              onClick={isOutOfStock ? undefined : handleAddToCart}
-              disabled={isOutOfStock || cartStatus === "loading"}
-              className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-lg border transition-colors disabled:opacity-50",
-                cartStatus === "success"
-                  ? "border-transparent bg-green-600 text-white"
-                  : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground",
-              )}
-              aria-label="Add to cart"
-            >
-              <IconShoppingBagPlus className="size-4" aria-hidden="true" />
-            </button>
+            <CardAddToCartButton
+              productId={product.id}
+              productSlug={product.slug}
+              hasVariants={hasVariants}
+              disabled={isOutOfStock}
+              label={buttonLabel}
+            />
           </div>
         </div>
 
-        {/* Desktop: full-width button */}
-        <button
-          type="button"
-          onClick={isOutOfStock ? undefined : handleAddToCart}
-          disabled={isOutOfStock || cartStatus === "loading"}
-          className={cn(
-            "mt-3 hidden w-full rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200 sm:block",
-            isOutOfStock
-              ? "cursor-not-allowed border border-border bg-muted text-muted-foreground"
-              : cartStatus === "success"
-                ? "bg-green-600 text-white"
-                : "bg-primary text-primary-foreground hover:bg-primary/90",
-          )}
-        >
-          {cartStatus === "loading"
-            ? "Adding..."
-            : cartStatus === "success"
-              ? "Added!"
-              : isOutOfStock
-                ? "Out of Stock"
-                : "Add to Cart"}
-        </button>
+        {/* Desktop: full-width button — shows "Choose options" for variant products */}
+        <div className="mt-3 hidden sm:block">
+          <CardAddToCartButton
+            productId={product.id}
+            productSlug={product.slug}
+            hasVariants={hasVariants}
+            disabled={isOutOfStock}
+            label={buttonLabel}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { API_BASE, SERVER_API_BASE } from '../lib/constants';
-import { getCsrfToken, getCsrfHeaderName } from '../lib/csrf';
+import { getAuthTokenFromBrowserCookie } from '../lib/auth-cookie';
 import { cartToken } from '../stores/cart-store';
 
 export interface ApiEnvelope<T> {
@@ -62,16 +62,14 @@ async function request<T>(
   body?: unknown,
   extraHeaders?: Record<string, string>,
 ): Promise<T> {
-  const isMutating = method !== 'GET';
-  const token = cartToken.get();
+  const cartTokenValue = cartToken.get();
+  const authTokenValue = import.meta.env.SSR ? null : getAuthTokenFromBrowserCookie();
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-    ...(token ? { 'X-Cart-Token': token } : {}),
-    ...(isMutating
-      ? { [getCsrfHeaderName()]: getCsrfToken() ?? '' }
-      : {}),
+    ...(cartTokenValue ? { 'X-Cart-Token': cartTokenValue } : {}),
+    ...(authTokenValue ? { Authorization: `Bearer ${authTokenValue}` } : {}),
     ...extraHeaders,
   };
 
@@ -79,12 +77,10 @@ async function request<T>(
 
   const res = await fetch(`${requestBase}${path}`, {
     method,
-    credentials: 'include',
     headers,
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
 
-  // CSRF mismatch — handled by caller if needed
   const envelope = (await res.json()) as ApiEnvelope<T>;
 
   if (!res.ok || !envelope.success) {
@@ -115,14 +111,15 @@ export const apiClient = {
   delete: <T>(path: string, headers?: Record<string, string>) =>
     request<T>('DELETE', path, undefined, headers),
 
-  /** For paginated endpoints that return both `data[]` and `meta`. */
   async paginated<T>(path: string, headers?: Record<string, string>): Promise<PaginatedResult<T>> {
-    const token = cartToken.get();
+    const cartTokenValue = cartToken.get();
+    const authTokenValue = import.meta.env.SSR ? null : getAuthTokenFromBrowserCookie();
 
     const reqHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      ...(token ? { 'X-Cart-Token': token } : {}),
+      ...(cartTokenValue ? { 'X-Cart-Token': cartTokenValue } : {}),
+      ...(authTokenValue ? { Authorization: `Bearer ${authTokenValue}` } : {}),
       ...headers,
     };
 
@@ -130,7 +127,6 @@ export const apiClient = {
 
     const res = await fetch(`${requestBase}${path}`, {
       method: 'GET',
-      credentials: 'include',
       headers: reqHeaders,
     });
 
@@ -151,10 +147,9 @@ export const apiClient = {
 
 /**
  * Server-side API client for use inside Astro page frontmatter.
- * Forwards the incoming request's Cookie header so the session is preserved.
- * Does NOT inject cart token or CSRF (not needed for authenticated server reads).
+ * Takes the auth token string (extracted from cookies by the caller).
  */
-export function createServerClient(cookieHeader: string) {
+export function createServerClient(authToken: string | null) {
   async function serverRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
     if (!SERVER_API_BASE) {
       throw new Error(
@@ -162,13 +157,15 @@ export function createServerClient(cookieHeader: string) {
       );
     }
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    };
+
     const res = await fetch(`${SERVER_API_BASE}${path}`, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Cookie: cookieHeader,
-      },
+      headers,
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
 
@@ -193,13 +190,15 @@ export function createServerClient(cookieHeader: string) {
       );
     }
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    };
+
     const res = await fetch(`${SERVER_API_BASE}${path}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Cookie: cookieHeader,
-      },
+      headers,
     });
 
     const envelope = (await res.json()) as PaginatedEnvelope<T>;

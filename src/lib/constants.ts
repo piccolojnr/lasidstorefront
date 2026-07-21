@@ -1,5 +1,5 @@
 const publicApiBase = import.meta.env.PUBLIC_API_BASE?.trim() || '/api/v1';
-const serverApiBase = import.meta.env.API_BASE?.trim();
+const serverApiBase = import.meta.env.PUBLIC_SERVER_API_BASE?.trim();
 
 export const API_BASE = publicApiBase;
 

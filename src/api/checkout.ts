@@ -93,6 +93,7 @@ export interface PaymentData {
 
 export interface CheckoutInitResult {
   order: Order;
+  token?: string;
   payment: PaymentData;
 }
 

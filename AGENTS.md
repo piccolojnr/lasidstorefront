@@ -48,9 +48,8 @@ src/
 
 - **All API calls go through `src/api/`** — no raw `fetch()` calls in components or pages.
 - The base client lives in `src/api/client.ts`. It handles:
-  - `credentials: 'include'` on every request
   - `X-Cart-Token` header injected from the cart token store
-  - `X-XSRF-TOKEN` CSRF header on mutating requests
+  - `Authorization: Bearer` header injected from the auth cookie
   - Response envelope unwrapping — functions return `data` directly or throw typed errors
 - One file per domain: `catalog.ts`, `cart.ts`, `auth.ts`, `checkout.ts`, `payments.ts`, `addresses.ts`, `orders.ts`, `profile.ts`
 
@@ -68,18 +67,21 @@ src/
 - The API client reads `cartToken` and injects it as `X-Cart-Token` on every cart and checkout request.
 - Do not read `localStorage` directly for the cart token anywhere else.
 
-## CSRF
+## Auth (JWT / Sanctum tokens)
 
-- Call `GET /api/v1/auth/csrf-cookie` once on app bootstrap (inside the root layout or a top-level island).
-- The returned cookie name and header name are stored in `src/lib/csrf.ts`.
-- The API client reads the cookie and injects the header automatically on non-GET requests.
+- Authentication uses Laravel Sanctum personal access tokens (JWT-style, stateless).
+- The token is stored in a cookie (`auth_token`) set by the backend or the `/auth/verify` page.
+- The API client reads the cookie and injects `Authorization: Bearer` on every request.
+- SSR pages extract the token from cookies and pass it to `createServerClient(authToken)`.
+- The middleware (`src/middleware/index.ts`) checks for the `auth_token` cookie presence.
 
 ## Session / auth
 
-- Server-rendered Astro pages check auth state via Astro middleware (`src/middleware/index.ts`).
-- Client-side React islands read from `src/stores/session-store.ts` (`sessionStore` atom), which is populated by calling `GET /api/v1/auth/session` on mount.
+- Server-rendered Astro pages check auth state via Astro middleware (`src/middleware/index.ts`) — checks `auth_token` cookie.
+- Client-side React islands read from `src/stores/session-store.ts` (`sessionStore` atom), populated by calling `GET /api/v1/auth/session` on mount (uses the Bearer token).
 - Protected pages (account, checkout) redirect to `/auth/login` when unauthenticated.
 - Magic link is the primary auth flow. Password login is the fallback.
+- `/auth/verify` page handles magic link callback — extracts token, sets cookie, redirects.
 
 ## React islands
 
@@ -109,7 +111,6 @@ Set `PUBLIC_API_BASE` in `.env` for local development if the backend runs on a d
 - API errors surface as typed `ApiError` objects thrown by `src/api/client.ts`.
 - `422` errors include a field-level `errors` map — forms should display these inline.
 - `401` errors should trigger a redirect to `/auth/login`.
-- `409` (CSRF mismatch) should re-bootstrap CSRF and retry once before failing.
 
 ## Do not
 
@@ -122,7 +123,6 @@ Set `PUBLIC_API_BASE` in `.env` for local development if the backend runs on a d
 
 ## UI Design Alignment
 
-- Follow DESIGN.md strictly for all UI decisions.
 - Prefer simple, functional UI over decorative design.
 - ProductCard is the most important reusable component — prioritize its correctness.
 - Do not introduce new colors outside the defined palette.

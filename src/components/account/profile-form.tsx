@@ -53,45 +53,58 @@ export default function ProfileForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-5">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="name">Full name</Label>
-        <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} aria-invalid={!!fieldErrors.name} />
-        {fieldErrors.name && <p className="text-destructive text-xs">{fieldErrors.name[0]}</p>}
-      </div>
+    <form onSubmit={handleSubmit} className="flex max-w-lg flex-col gap-6">
+      {/* Account details */}
+      <section className="rounded-xl border border-border p-5 sm:p-6">
+        <h2 className="text-sm font-semibold text-foreground">Account details</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          This information is used for your orders and deliveries.
+        </p>
+        <div className="mt-5 flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="name">Full name</Label>
+            <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} aria-invalid={!!fieldErrors.name} />
+            {fieldErrors.name && <p className="text-destructive text-xs">{fieldErrors.name[0]}</p>}
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="phone">Phone</Label>
-        <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} aria-invalid={!!fieldErrors.phone} />
-        {fieldErrors.phone && <p className="text-destructive text-xs">{fieldErrors.phone[0]}</p>}
-      </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="phone">Phone</Label>
+            <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} aria-invalid={!!fieldErrors.phone} />
+            {fieldErrors.phone && <p className="text-destructive text-xs">{fieldErrors.phone[0]}</p>}
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={!!fieldErrors.email} />
-        {fieldErrors.email && <p className="text-destructive text-xs">{fieldErrors.email[0]}</p>}
-        {email !== (user?.email ?? '') && (
-          <p className="text-xs text-amber-600">Changing your email will require re-verification.</p>
-        )}
-      </div>
-
-      <hr className="border-border" />
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="password">
-          New password{' '}
-          <span className="text-muted-foreground font-normal">(leave blank to keep current)</span>
-        </Label>
-        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" aria-invalid={!!fieldErrors.password} />
-        {fieldErrors.password && <p className="text-destructive text-xs">{fieldErrors.password[0]}</p>}
-      </div>
-
-      {password && (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="confirmation">Confirm new password</Label>
-          <Input id="confirmation" type="password" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="new-password" />
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={!!fieldErrors.email} />
+            {fieldErrors.email && <p className="text-destructive text-xs">{fieldErrors.email[0]}</p>}
+            {email !== (user?.email ?? '') && (
+              <p className="text-xs text-amber-600">Changing your email will require re-verification.</p>
+            )}
+          </div>
         </div>
-      )}
+      </section>
+
+      {/* Password */}
+      <section className="rounded-xl border border-border p-5 sm:p-6">
+        <h2 className="text-sm font-semibold text-foreground">Change password</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Leave blank to keep your current password.
+        </p>
+        <div className="mt-5 flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="password">New password</Label>
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" aria-invalid={!!fieldErrors.password} />
+            {fieldErrors.password && <p className="text-destructive text-xs">{fieldErrors.password[0]}</p>}
+          </div>
+
+          {password && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="confirmation">Confirm new password</Label>
+              <Input id="confirmation" type="password" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="new-password" />
+            </div>
+          )}
+        </div>
+      </section>
 
       {status === 'error' && errorMsg && (
         <p className="bg-destructive/10 text-destructive rounded-lg px-3.5 py-2.5 text-sm">{errorMsg}</p>

@@ -1,11 +1,13 @@
 ---
 import Layout from '../../layouts/layout.astro';
 import { createServerClient, ApiError } from '../../api/client';
+import { getAuthTokenFromCookies } from '../../lib/auth-cookie';
 import { formatMoney } from '../../lib/money';
 import type { Order } from '../../api/checkout';
 
 const cookieHeader = Astro.request.headers.get('cookie') ?? '';
-const api = createServerClient(cookieHeader);
+const authToken = getAuthTokenFromCookies(cookieHeader);
+const api = createServerClient(authToken);
 
 // Paystack sends either ?reference= or ?trxref= (both contain the same value)
 const reference =

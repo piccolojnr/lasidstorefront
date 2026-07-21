@@ -5,19 +5,12 @@ import { sessionStore } from '../../stores/session-store';
 
 /**
  * Invisible island that runs on every page load.
- * - Bootstraps CSRF token
  * - Hydrates session state
  * - Fetches cart so the nav badge is accurate
  */
 export default function AppBootstrap() {
   useEffect(() => {
     async function init() {
-      try {
-        await authApi.bootstrapCsrf();
-      } catch {
-        // Non-fatal — CSRF will fail gracefully on mutations
-      }
-
       try {
         await authApi.getSession();
       } catch {

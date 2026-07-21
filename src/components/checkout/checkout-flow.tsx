@@ -13,6 +13,7 @@ import { checkoutApi, type ShippingMethod, type CheckoutInitPayload, type GuestC
 import { paymentsApi } from '@/api/payments';
 import { ApiError } from '@/api/client';
 import { formatMoney } from '@/lib/money';
+import { setAuthTokenCookie } from '@/lib/auth-cookie';
 import AddressForm from './address-form';
 import GuestCheckoutForm from './guest-checkout-form';
 
@@ -111,6 +112,9 @@ export default function CheckoutFlow() {
           delivery_notes: deliveryNotes || undefined,
         });
         authorizationUrl = result.payment.authorization_url;
+        if (result.token) {
+          setAuthTokenCookie(result.token);
+        }
       } else {
         if (!selectedAddress) return;
         const payload: CheckoutInitPayload = {

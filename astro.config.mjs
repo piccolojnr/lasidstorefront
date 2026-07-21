@@ -11,9 +11,18 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://lasidcommerce.test',
+          changeOrigin: true,
+        },
+      },
+    },
   },
   server: {
     host: true,
     port: 4321,
+    allowedHosts: ['backthred.test']
   },
 });

@@ -1,0 +1,53 @@
+---
+import Layout from '../../layouts/layout.astro';
+import { createServerClient, ApiError } from '../../api/client';
+import { getAuthTokenFromCookies } from '../../lib/auth-cookie';
+import { ROUTES } from '../../lib/constants';
+
+const token = Astro.url.searchParams.get('token');
+const redirectTo = Astro.url.searchParams.get('redirect') ?? ROUTES.accountProfile;
+
+if (!token) {
+  return Astro.redirect(`${ROUTES.authLogin}?auth_error=invalid_or_expired_link`);
+}
+
+const cookieHeader = Astro.request.headers.get('cookie') ?? '';
+const existingAuthToken = getAuthTokenFromCookies(cookieHeader);
+const api = createServerClient(existingAuthToken);
+
+try {
+  const result = await api.get<{
+    token: string;
+    user: { id: number; name: string | null; email: string };
+    email_verified: boolean;
+    redirect_to: string;
+    was_created: boolean;
+  }>(`/auth/magic-link/verify?token=${encodeURIComponent(token)}`);
+
+  const destination = result.redirect_to || redirectTo;
+  const maxAge = 60 * 60 * 24 * 30; // 30 days
+  const isSecure = Astro.url.protocol === 'https:';
+  const secureFlag = isSecure ? '; Secure' : '';
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: destination,
+      'Set-Cookie': `auth_token=${encodeURIComponent(result.token)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secureFlag}`,
+    },
+  });
+} catch (err) {
+  if (err instanceof ApiError) {
+    return Astro.redirect(`${ROUTES.authLogin}?auth_error=${err.data?.error_code ?? 'invalid_or_expired_link'}`);
+  }
+  return Astro.redirect(`${ROUTES.authLogin}?auth_error=invalid_or_expired_link`);
+}
+---
+
+<Layout title="Signing you in...">
+  <div class="flex min-h-[80dvh] items-center justify-center px-4 py-16">
+    <div class="w-full max-w-sm text-center">
+      <p class="text-sm text-muted-foreground">Signing you in...</p>
+    </div>
+  </div>
+</Layout>

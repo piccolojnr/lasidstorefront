@@ -1,6 +1,7 @@
 ---
 import AccountLayout from '../../../layouts/account-layout.astro';
 import { createServerClient, ApiError } from '../../../api/client';
+import { getAuthTokenFromCookies } from '../../../lib/auth-cookie';
 import { formatMoney } from '../../../lib/money';
 import type { Order } from '../../../api/checkout';
 import type { TimelineEvent } from '../../../api/orders';
@@ -9,7 +10,8 @@ const { id } = Astro.params;
 if (!id) return Astro.redirect('/account/orders');
 
 const cookieHeader = Astro.request.headers.get('cookie') ?? '';
-const api = createServerClient(cookieHeader);
+const authToken = getAuthTokenFromCookies(cookieHeader);
+const api = createServerClient(authToken);
 
 let order: Order | null = null;
 let timeline: TimelineEvent[] = [];
@@ -44,6 +46,14 @@ const paymentStyles: Record<string, string> = {
   refunded: 'text-muted-foreground',
 };
 
+// Progress stepper — derived from the order status.
+const steps = ['Placed', 'Processing', 'Completed'];
+const currentStep =
+  order.status === 'completed' ? 3 :
+  order.status === 'processing' ? 2 :
+  order.status === 'pending' ? 1 : 0;
+const isCancelled = order.status === 'cancelled';
+
 function getOrderItemImage(item: Order['items'][number]): string | null {
   return item.primary_image_thumb_url ?? item.primary_image_url;
 }
@@ -53,7 +63,7 @@ function getOrderItemImage(item: Order['items'][number]): string | null {
   <div class="flex flex-col gap-8">
 
     <!-- Header -->
-    <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex flex-wrap items-center gap-2">
         <span class:list={[
           'rounded-full px-3 py-1 text-sm font-medium capitalize',
@@ -74,6 +84,58 @@ function getOrderItemImage(item: Order['items'][number]): string | null {
         })}
       </p>
     </div>
+
+    <!-- Progress -->
+    {isCancelled ? (
+      <div class="rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+        <p class="text-sm font-semibold text-red-700">This order was cancelled</p>
+        <p class="mt-0.5 text-sm text-red-600/80">
+          If you didn't request this, please contact support.
+        </p>
+      </div>
+    ) : (
+      <ol class="flex items-center">
+        {steps.map((step, i) => {
+          const stepNumber = i + 1;
+          const isDone = stepNumber < currentStep || currentStep === 3;
+          const isCurrent = stepNumber === currentStep && currentStep < 3;
+          return (
+            <li class:list={['flex items-center', i < steps.length - 1 && 'flex-1']}>
+              <div class="flex flex-col items-center gap-1.5">
+                <span class:list={[
+                  'flex h-7 w-7 items-center justify-center rounded-full border-2 text-xs font-semibold transition-colors',
+                  isDone
+                    ? 'border-foreground bg-foreground text-background'
+                    : isCurrent
+                      ? 'border-foreground bg-background text-foreground'
+                      : 'border-border bg-background text-muted-foreground',
+                ]}>
+                  {isDone ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                  ) : (
+                    stepNumber
+                  )}
+                </span>
+                <span class:list={[
+                  'text-[11px] font-medium sm:text-xs',
+                  isDone || isCurrent ? 'text-foreground' : 'text-muted-foreground',
+                ]}>
+                  {step}
+                </span>
+              </div>
+              {i < steps.length - 1 && (
+                <div class:list={[
+                  'mx-2 mb-5 h-0.5 flex-1 rounded-full',
+                  stepNumber < currentStep ? 'bg-foreground' : 'bg-border',
+                ]} />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    )}
 
     <!-- Items -->
     {order.items.length > 0 && (
@@ -169,7 +231,7 @@ function getOrderItemImage(item: Order['items'][number]): string | null {
         <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Tracking</h2>
         <ol class="relative border-l border-border pl-5">
           {timeline.map((event) => (
-            <li class="pb-5">
+            <li class="pb-5 last:pb-0">
               <div class="absolute -left-[5px] mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-foreground" />
               <p class="text-sm font-medium text-foreground">{event.label}</p>
               <p class="text-xs text-muted-foreground">
@@ -185,15 +247,28 @@ function getOrderItemImage(item: Order['items'][number]): string | null {
     )}
 
     <!-- Notes -->
-    {order.notes && (
-      <section>
-        <h2 class="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Order notes</h2>
-        <p class="text-sm text-muted-foreground">{order.notes}</p>
+    {(order.notes || order.delivery_notes) && (
+      <section class="grid gap-6 sm:grid-cols-2">
+        {order.notes && (
+          <div>
+            <h2 class="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Order notes</h2>
+            <p class="text-sm text-muted-foreground">{order.notes}</p>
+          </div>
+        )}
+        {order.delivery_notes && (
+          <div>
+            <h2 class="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Delivery notes</h2>
+            <p class="text-sm text-muted-foreground">{order.delivery_notes}</p>
+          </div>
+        )}
       </section>
     )}
 
-    <a href="/account/orders" class="self-start text-sm text-muted-foreground hover:text-foreground transition-colors">
-      ← Back to orders
+    <a href="/account/orders" class="inline-flex items-center gap-1.5 self-start text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+      </svg>
+      Back to orders
     </a>
 
   </div>

@@ -2,9 +2,11 @@
 import AccountLayout from '../../layouts/account-layout.astro';
 import AddressList from '../../components/account/address-list';
 import { createServerClient, ApiError } from '../../api/client';
+import { getAuthTokenFromCookies } from '../../lib/auth-cookie';
 
 const cookieHeader = Astro.request.headers.get('cookie') ?? '';
-const api = createServerClient(cookieHeader);
+const authToken = getAuthTokenFromCookies(cookieHeader);
+const api = createServerClient(authToken);
 
 try {
   // Auth check — if this throws 401 the redirect fires
@@ -16,6 +18,6 @@ try {
 }
 ---
 
-<AccountLayout title="Addresses">
+<AccountLayout title="Addresses" description="Your saved delivery addresses.">
   <AddressList client:load />
 </AccountLayout>

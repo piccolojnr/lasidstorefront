@@ -2,10 +2,12 @@
 import AccountLayout from '../../layouts/account-layout.astro';
 import ProfileForm from '../../components/account/profile-form';
 import { createServerClient, ApiError } from '../../api/client';
+import { getAuthTokenFromCookies } from '../../lib/auth-cookie';
 import type { SessionUser } from '../../stores/session-store';
 
 const cookieHeader = Astro.request.headers.get('cookie') ?? '';
-const api = createServerClient(cookieHeader);
+const authToken = getAuthTokenFromCookies(cookieHeader);
+const api = createServerClient(authToken);
 
 let user: SessionUser | null = null;
 
@@ -18,7 +20,7 @@ try {
 }
 ---
 
-<AccountLayout title="Profile">
+<AccountLayout title="Profile" description="Manage your personal details and password.">
   {user ? (
     <ProfileForm client:load />
   ) : (

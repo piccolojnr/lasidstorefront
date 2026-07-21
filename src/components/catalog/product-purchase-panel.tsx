@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useStore } from "@nanostores/react";
 import { cartApi } from "@/api/cart";
+import { cartStore } from "@/stores/cart-store";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import type {
@@ -123,6 +125,7 @@ export default function ProductPurchasePanel({
   const [quantity, setQuantity] = React.useState(1);
   const [addStatus, setAddStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = React.useState("");
+  const cart = useStore(cartStore);
 
   // ── Variant resolution ──────────────────────────────────────────────────────
   const allOptionTypesSelected =
@@ -177,34 +180,61 @@ export default function ProductPurchasePanel({
     ? (selectedVariant?.stock.quantity ?? null)
     : (stock?.quantity ?? null);
 
-  const maxQuantity =
+  // How many units of the current selection are already in the cart.
+  const inCartQty = React.useMemo(() => {
+    if (!cart) return 0;
+    if (hasVariants) {
+      if (!selectedVariant) return 0;
+      return cart.items
+        .filter((item) => item.product_variant_id === selectedVariant.id)
+        .reduce((sum, item) => sum + item.quantity, 0);
+    }
+    return cart.items
+      .filter(
+        (item) => item.product_id === productId && item.product_variant_id === null,
+      )
+      .reduce((sum, item) => sum + item.quantity, 0);
+  }, [cart, hasVariants, selectedVariant, productId]);
+
+  // When stock is capped, what's still available to add = stock − in cart.
+  const stockIsCapped =
     (hasVariants ? true : trackInventory) &&
     typeof stockQty === "number" &&
-    stockQty > 0
-      ? stockQty
-      : 99;
+    stockQty > 0;
+
+  const remainingQty = stockIsCapped ? Math.max(0, stockQty! - inCartQty) : null;
+  const cartLimitReached = remainingQty === 0;
+
+  const maxQuantity = remainingQty !== null ? remainingQty : 99;
 
   // Reset qty to 1 when variant changes
   React.useEffect(() => {
     setQuantity(1);
   }, [selectedVariant?.id]);
 
+  // Clamp qty when the available-to-add amount shrinks (e.g. after adding)
+  React.useEffect(() => {
+    setQuantity((q) => Math.min(q, Math.max(1, maxQuantity)));
+  }, [maxQuantity]);
+
   // ── Button label ────────────────────────────────────────────────────────────
   const buttonLabel = !allOptionTypesSelected
     ? "Select options"
     : comboUnavailable
       ? "Not available"
-      : !canAdd
-        ? "Out of Stock"
-        : isPreorder
-          ? "Pre-order"
-          : addStatus === "success"
-            ? "Added to cart!"
-            : "Add to Cart";
+      : cartLimitReached
+        ? "Limit reached"
+        : !canAdd
+          ? "Out of Stock"
+          : isPreorder
+            ? "Pre-order"
+            : addStatus === "success"
+              ? "Added to cart!"
+              : "Add to Cart";
 
   // ── Add to cart ─────────────────────────────────────────────────────────────
   async function handleAdd() {
-    if (!canAdd || !allOptionTypesSelected || comboUnavailable || addStatus === "loading") return;
+    if (!canAdd || !allOptionTypesSelected || comboUnavailable || cartLimitReached || addStatus === "loading") return;
     setAddStatus("loading");
     setErrorMsg("");
     try {
@@ -222,7 +252,12 @@ export default function ProductPurchasePanel({
     }
   }
 
-  const addDisabled = !canAdd || !allOptionTypesSelected || comboUnavailable || addStatus === "loading";
+  const addDisabled =
+    !canAdd ||
+    !allOptionTypesSelected ||
+    comboUnavailable ||
+    cartLimitReached ||
+    addStatus === "loading";
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -380,8 +415,21 @@ export default function ProductPurchasePanel({
         <p className="text-sm text-destructive">{errorMsg}</p>
       )}
 
-      {maxQuantity < 99 && quantity >= maxQuantity && (
-        <p className="text-xs text-warning">Max available quantity: {maxQuantity}</p>
+      {/* Cart-aware stock feedback */}
+      {cartLimitReached ? (
+        <p className="text-sm font-medium text-warning">
+          All available stock is already in your cart.
+        </p>
+      ) : inCartQty > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          {inCartQty} already in your cart
+          {remainingQty !== null && ` — ${remainingQty} more available`}
+        </p>
+      ) : (
+        maxQuantity < 99 &&
+        quantity >= maxQuantity && (
+          <p className="text-xs text-warning">Max available quantity: {maxQuantity}</p>
+        )
       )}
 
       {/* Mobile sticky bar */}
@@ -413,11 +461,13 @@ export default function ProductPurchasePanel({
                 ? "Select options"
                 : comboUnavailable
                   ? "Not available"
-                  : !canAdd
-                    ? "Out of Stock"
-                    : isPreorder
-                      ? "Pre-order"
-                      : "Add to Cart"}
+                  : cartLimitReached
+                    ? "Limit reached"
+                    : !canAdd
+                      ? "Out of Stock"
+                      : isPreorder
+                        ? "Pre-order"
+                        : "Add to Cart"}
         </button>
       </div>
     </>

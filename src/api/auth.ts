@@ -1,7 +1,7 @@
 import { apiClient } from './client';
 import { cartToken } from '../stores/cart-store';
 import { sessionStore, type SessionUser } from '../stores/session-store';
-import { setCsrfNames, setCsrfToken } from '../lib/csrf';
+import { setAuthTokenCookie, clearAuthTokenCookie } from '../lib/auth-cookie';
 
 export interface SessionResponse {
   authenticated: boolean;
@@ -11,22 +11,19 @@ export interface SessionResponse {
 
 export interface LoginResponse {
   authenticated: boolean;
+  token?: string;
   user: SessionUser;
 }
 
-export interface CsrfResponse {
-  csrf_token: string;
-  csrf_cookie: string;
-  csrf_header: string;
+export interface MagicLinkVerifyResponse {
+  token: string;
+  user: SessionUser;
+  email_verified: boolean;
+  redirect_to: string;
+  was_created: boolean;
 }
 
 export const authApi = {
-  async bootstrapCsrf(): Promise<void> {
-    const data = await apiClient.get<CsrfResponse>('/auth/csrf-cookie');
-    setCsrfNames(data.csrf_cookie, data.csrf_header);
-    setCsrfToken(data.csrf_token);
-  },
-
   async getSession(): Promise<SessionResponse> {
     const data = await apiClient.get<SessionResponse>('/auth/session');
     sessionStore.set({ ...data, loading: false });
@@ -41,12 +38,19 @@ export const authApi = {
     });
   },
 
+  verifyMagicLink(token: string): Promise<MagicLinkVerifyResponse> {
+    return apiClient.get<MagicLinkVerifyResponse>(`/auth/magic-link/verify?token=${token}`);
+  },
+
   async loginWithPassword(email: string, password: string): Promise<LoginResponse> {
     const data = await apiClient.post<LoginResponse>('/auth/password/login', {
       email,
       password,
       cart_token: cartToken.get() || undefined,
     });
+    if (data.token) {
+      setAuthTokenCookie(data.token);
+    }
     sessionStore.set({ authenticated: true, user: data.user, email_verified: true, loading: false });
     return data;
   },
@@ -66,6 +70,7 @@ export const authApi = {
 
   async logout(): Promise<void> {
     await apiClient.post('/auth/logout');
+    clearAuthTokenCookie();
     sessionStore.set({ authenticated: false, user: null, email_verified: false, loading: false });
   },
 };
