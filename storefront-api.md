@@ -113,6 +113,34 @@ These routes do not require an authenticated customer, but they do run inside th
 
 These routes are available without a customer session.
 
+### Storefront Announcement
+
+#### `GET /api/v1/storefront/announcement`
+
+Returns the currently active header announcement. The `enabled` field is
+`false` when the announcement is disabled or outside its scheduled dates.
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": null,
+  "data": {
+    "enabled": true,
+    "message": "Free next-day delivery in Accra & Kumasi on orders above GHC 250",
+    "cta": {
+      "label": "Shop now",
+      "url": "/products"
+    },
+    "variant": "default",
+    "starts_at": null,
+    "ends_at": null
+  },
+  "errors": null
+}
+```
+
 ### Catalog
 
 #### `GET /api/v1/catalog/brands`

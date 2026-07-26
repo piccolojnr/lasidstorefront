@@ -3,6 +3,7 @@ import CartCount from "./cart/cart-count";
 import WishlistCount from "./catalog/wishlist-count";
 import HeaderSearch from "./header-search";
 import { catalogApi, type Category } from "../api/catalog";
+import { storefrontApi, type StorefrontAnnouncement } from "../api/storefront";
 import { ROUTES } from "../lib/constants";
 import { siteConfig } from "../lib/site-config";
 
@@ -15,6 +16,19 @@ const isOnSale = Astro.url.searchParams.get("on_sale") === "true";
 const categoriesResult = await catalogApi
   .getCategories({ root_only: true })
   .catch(() => []);
+
+const announcementFallback: StorefrontAnnouncement = {
+  enabled: true,
+  message: siteConfig.topBar.message,
+  cta: null,
+  variant: "default",
+  starts_at: null,
+  ends_at: null,
+};
+
+const announcement = await storefrontApi
+  .getAnnouncement()
+  .catch(() => announcementFallback);
 
 function flattenCategories(
   items: Category[],
@@ -331,21 +345,32 @@ const isRouteActive = (href: string) =>
       </div>
     </div>
 
-    <!-- Top bar -->
-    <div class="border-t border-border bg-primary text-primary-foreground">
-      <div
-        class="mx-auto flex min-h-6 max-w-360 items-center justify-center px-4 py-1 text-[10px] sm:justify-between sm:px-6 lg:px-8"
-      >
-        <p class="truncate">
-          {siteConfig.topBar.message}
-        </p>
+    {
+      announcement.enabled && (
+        <div
+          class:list={[
+            "border-t border-border text-primary-foreground",
+            announcement.variant === "sale" && "bg-destructive",
+            announcement.variant === "success" && "bg-success",
+            announcement.variant === "warning" && "bg-warning text-black",
+            announcement.variant === "default" && "bg-primary",
+          ]}
+        >
+          <div class="mx-auto flex min-h-9 max-w-360 items-center justify-center gap-4 px-4 py-2 text-xs leading-5 sm:justify-between sm:px-6 lg:px-8">
+            <p class="truncate font-medium">{announcement.message}</p>
 
-        <div class="hidden items-center gap-5 md:flex">
-          <span>{siteConfig.topBar.payment}</span>
-          <span>{siteConfig.topBar.support}</span>
+            {announcement.cta && (
+              <a
+                href={announcement.cta.url}
+                class="shrink-0 underline underline-offset-2 transition-opacity hover:opacity-75"
+              >
+                {announcement.cta.label}
+              </a>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      )
+    }
 
     <!-- Desktop category navigation -->
     <div class="hidden border-t border-border md:block">
