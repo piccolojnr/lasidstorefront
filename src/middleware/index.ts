@@ -17,9 +17,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const authToken = getAuthTokenFromCookies(cookieHeader);
 
   if (!authToken) {
-    const loginUrl = new URL(ROUTES.authLogin, context.url.origin);
-    loginUrl.searchParams.set('redirect', pathname);
-    return context.redirect(loginUrl.toString());
+    const redirect = `${ROUTES.authLogin}?redirect=${encodeURIComponent(pathname)}`;
+    return context.redirect(redirect);
   }
 
   return next();
