@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authApi } from '../../api/auth';
+import { ApiError } from '../../api/client';
 import { setAuthTokenCookie } from '../../lib/auth-cookie';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 
 export default function MagicLinkVerifier({ token, redirectTo }: Props) {
   const [status, setStatus] = useState<'idle' | 'verifying' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('This sign-in link is invalid. Request a new one.');
 
   const verify = async () => {
     setStatus('verifying');
@@ -18,7 +20,10 @@ export default function MagicLinkVerifier({ token, redirectTo }: Props) {
 
       setAuthTokenCookie(result.token);
       window.location.replace(result.redirect_to || redirectTo);
-    } catch {
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setErrorMessage(error.message);
+      }
       setStatus('error');
     }
   };
@@ -27,7 +32,7 @@ export default function MagicLinkVerifier({ token, redirectTo }: Props) {
     return (
       <div className="space-y-3">
         <p className="text-sm text-destructive">
-          This sign-in link has expired or is invalid. Request a new one.
+          {errorMessage}
         </p>
         <a className="text-sm font-medium text-foreground underline" href="/auth/login">
           Return to sign in
