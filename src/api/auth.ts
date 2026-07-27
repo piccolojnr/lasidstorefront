@@ -39,7 +39,7 @@ export const authApi = {
   },
 
   verifyMagicLink(token: string): Promise<MagicLinkVerifyResponse> {
-    return apiClient.get<MagicLinkVerifyResponse>(`/auth/magic-link/verify?token=${token}`);
+    return apiClient.post<MagicLinkVerifyResponse>('/auth/magic-link/verify', { token });
   },
 
   async loginWithPassword(email: string, password: string): Promise<LoginResponse> {
