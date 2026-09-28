@@ -1,46 +1,33 @@
-# Astro Starter Kit: Basics
+# Backthred Storefront
+
+Customer-facing storefront for Backthred, built with Astro (SSR), React, Tailwind and shadcn/ui.
+Talks to the Laravel backend in [lasidcommerce](https://github.com/piccolojnr/lasidcommerce).
+
+## Local development
 
 ```sh
-pnpm create astro@latest -- --template basics
+pnpm install
+cp .env.example .env   # set PUBLIC_API_BASE
+pnpm dev               # http://localhost:4321
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Environment
 
-## 🚀 Project Structure
+These are baked into the build, so changing them requires a rebuild:
 
-Inside of your Astro project, you'll see the following folders and files:
+| Variable | Purpose |
+| --- | --- |
+| `PUBLIC_API_BASE` | Backend API URL, e.g. `https://api.backthred.com/api/v1` |
+| `PUBLIC_SERVER_API_BASE` | Optional. Separate API URL for server-side requests |
+| `PUBLIC_SITE_URL` | Public URL of the storefront |
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+## Deployment
+
+Pushing to `master` builds a Docker image and publishes it to
+`ghcr.io/piccolojnr/backthred/storefront`. On the server:
+
+```sh
+cd docker
+docker compose pull
+docker compose up -d
 ```
-
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
